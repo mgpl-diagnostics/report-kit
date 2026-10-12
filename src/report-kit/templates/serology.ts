@@ -29,6 +29,8 @@ const dengueRows: Row[] = [
 export const dengue: ReportTemplate = {
   id: "dengue",
   name: "Dengue (IgG / IgM / NS1)",
+  specimen: "Serum",
+  method: "Rapid Card Test",
   fields: fieldsOf(dengueRows),
   build: (r) => [
     { title: "IMMUNOLOGY/ SEROLOGY", columns: COLS_SEROLOGY, rows: fillRows(dengueRows, r), style: { ...rapidStyle, rowGap: 24 } },
@@ -49,6 +51,7 @@ const viralRows: Row[] = [
 export const hivHbsagVdrl: ReportTemplate = {
   id: "hiv-hbsag-vdrl",
   name: "HIV / HBsAg / VDRL",
+  specimen: "Serum",
   fields: fieldsOf(viralRows),
   build: (r) => [
     {
@@ -84,6 +87,7 @@ const antigens: [keyof WidalResults, string, string][] = [
 export const widal: ReportTemplate<WidalResults> = {
   id: "widal",
   name: "Widal Test",
+  specimen: "Serum",
   fields: [
     ...antigens.map(([key, a, b]) => ({ key: key as string, label: `${a} ${b} (1:40 … 1:640)` })),
     { key: "impression", label: "Impression" },
@@ -130,6 +134,7 @@ const raRows: Row[] = [t("ra", "RA Factor", undefined, "Negative")];
 export const raFactor: ReportTemplate = {
   id: "ra-factor",
   name: "RA Factor",
+  specimen: "Serum",
   fields: fieldsOf(raRows),
   build: (r) => [
     {
@@ -147,6 +152,8 @@ export const raFactor: ReportTemplate = {
 export const typhidot = panel({
   id: "typhidot",
   name: "Typhidot (IgM / IgG)",
+  specimen: "Serum",
+  method: "Rapid Card Test",
   category: "Serology",
   title: "IMMUNOLOGY/ SEROLOGY",
   columns: COLS_SEROLOGY,
@@ -164,6 +171,8 @@ export const typhidot = panel({
 export const malariaAntigen = panel({
   id: "malaria-antigen",
   name: "Malaria Antigen (Pf / Pv)",
+  specimen: "Whole Blood (EDTA)",
+  method: "Rapid Card Test",
   category: "Serology",
   title: "IMMUNOLOGY/ SEROLOGY",
   columns: COLS_SEROLOGY,
@@ -181,6 +190,7 @@ export const malariaAntigen = panel({
 export const crpAso = panel({
   id: "crp-aso",
   name: "CRP / ASO (quantitative)",
+  specimen: "Serum",
   category: "Serology",
   title: "IMMUNOLOGY/ SEROLOGY",
   columns: COLS_STD,

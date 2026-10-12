@@ -22,4 +22,10 @@ export const MGPL_LAB: LabProfile = {
     emailSrc: "/report-assets/icon-email.svg",
     phoneSrc: "/report-assets/icon-phone.svg",
   },
+  sidebarText: "MAA GAYATRI PATH LAB",
+  footerLines: [
+    "Hematology  •  Biochemistry  •  Immunoassay  •  Serology  •  Clinical Pathology",
+    "In front Of Police Station, Arang, Raipur, Chhattisgarh   |   +91-9340638661   |   maagaytripatholgylab2006@gmail.com",
+  ],
+  // verifyBaseUrl: "https://your-domain/verify/",  // set when an online verify page exists
 };

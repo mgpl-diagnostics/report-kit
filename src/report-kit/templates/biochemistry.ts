@@ -15,6 +15,7 @@ const sugarRows: Row[] = [
 export const bloodSugar: ReportTemplate = {
   id: "blood-sugar",
   name: "Blood Sugar (F / PP / Random)",
+  specimen: "Fluoride Plasma",
   fields: fieldsOf(sugarRows),
   build: (r) => [{ title: TITLE, columns: COLS_STD, rows: fillRows(sugarRows, r, true), style: { rowGap: 10 } }],
   sample: { bsf: "152.9", bspp: "192.6" },
@@ -40,6 +41,7 @@ const lftRows: Row[] = [
 export const lft: ReportTemplate = {
   id: "lft",
   name: "Liver Function Test (LFT)",
+  specimen: "Serum",
   fields: fieldsOf(lftRows),
   build: (r) => [
     {
@@ -71,6 +73,7 @@ const lipidRows: Row[] = [
 export const lipid: ReportTemplate = {
   id: "lipid",
   name: "Lipid Profile",
+  specimen: "Serum",
   fields: fieldsOf(lipidRows),
   build: (r) => [
     {
@@ -109,6 +112,7 @@ const sectionStyle = { fontSize: 10, headingSize: 11, rowGap: 9, headingGap: 12,
 export const rft = panel({
   id: "rft",
   name: "Renal Function Test (RFT)",
+  specimen: "Serum",
   category: "Biochemistry",
   title: TITLE,
   rows: rftRows,
@@ -119,6 +123,7 @@ export const rft = panel({
 export const kft = panel({
   id: "kft",
   name: "Kidney Function Test (KFT)",
+  specimen: "Serum",
   category: "Biochemistry",
   title: TITLE,
   rows: [
@@ -139,6 +144,7 @@ export const kft = panel({
 export const electrolytes = panel({
   id: "electrolytes",
   name: "Serum Electrolytes (Na / K / Cl)",
+  specimen: "Serum",
   category: "Biochemistry",
   title: TITLE,
   rows: [h("Serum Electrolytes"), ...electrolyteRows],
@@ -151,6 +157,7 @@ export const electrolytes = panel({
 export const hba1c: ReportTemplate = {
   id: "hba1c",
   name: "Glycated Haemoglobin (HbA1c)",
+  specimen: "Whole Blood (EDTA)",
   category: "Biochemistry",
   fields: [
     { key: "hba1c", label: "HbA1c", unit: "%" },
@@ -177,6 +184,7 @@ export const hba1c: ReportTemplate = {
 export const ironProfile = panel({
   id: "iron-profile",
   name: "Iron Profile",
+  specimen: "Serum",
   category: "Biochemistry",
   title: TITLE,
   rows: [
@@ -196,6 +204,7 @@ export const ironProfile = panel({
 export const biochemistry = panel({
   id: "biochemistry",
   name: "Biochemistry — single tests",
+  specimen: "Serum",
   category: "Biochemistry",
   title: TITLE,
   onlyFilled: true,

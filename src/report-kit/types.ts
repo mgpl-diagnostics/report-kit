@@ -2,6 +2,9 @@
  *  "non-header" = top left blank for pre-printed letterhead paper; only QC stamp + signature. */
 export type ReportVariant = "header" | "non-header";
 
+/** "sidebar" = Navy Sidebar design (default); "classic" = replica of the original Word designs. */
+export type ReportDesign = "sidebar" | "classic";
+
 export interface Patient {
   /** Salutation before the name, e.g. "Mr", "Mrs", "Master", "Ku" */
   title?: string;
@@ -17,6 +20,14 @@ export interface Patient {
   refDoctor?: string;
   /** Date or preformatted string; printed DD-MM-YYYY. Defaults to today. */
   sampleCollectionDate?: Date | string;
+  /** Lab sample / accession number */
+  sampleId?: string;
+  /** e.g. "Whole Blood (EDTA)". Defaults to the specimens of the tests on the report. */
+  sampleType?: string;
+  /** Date or preformatted "12-10-2026 08:45 AM". Falls back to sampleCollectionDate. */
+  collectedAt?: Date | string;
+  registeredAt?: Date | string;
+  reportedAt?: Date | string;
 }
 
 /** A piece of text with optional formatting. */
@@ -147,6 +158,12 @@ export interface SectionStyle {
 export interface Section {
   /** Department title in the blue band, e.g. "HEMATOLOGY" */
   title: string;
+  /** Test / panel name, e.g. "Complete Blood Count (CBC)". Set from the template. */
+  subtitle?: string;
+  /** e.g. "Whole Blood (EDTA)" */
+  specimen?: string;
+  /** e.g. "Automated Cell Counter" */
+  method?: string;
   columns: Column[];
   /** Hide the column header row (Semen Analysis) */
   hideColumnHeader?: boolean;
@@ -176,6 +193,13 @@ export interface LabProfile {
   };
   qcStampSrc?: string;
   icons: { emailSrc: string; phoneSrc: string };
+  /** Vertical text in the sidebar (Navy Sidebar design). Defaults to the lab name in capitals. */
+  sidebarText?: string;
+  /** Lines printed in the letterhead footer (Navy Sidebar design) */
+  footerLines?: string[];
+  /** If set, the QR code links to `${verifyBaseUrl}${sampleId ?? patientId}`; otherwise it
+   *  encodes a plain-text summary of the report. */
+  verifyBaseUrl?: string;
 }
 
 export interface Report {
@@ -183,4 +207,6 @@ export interface Report {
   sections: Section[];
   /** Defaults to "--End of Report--" */
   endText?: string;
+  /** Override what the QR code encodes */
+  qrValue?: string;
 }

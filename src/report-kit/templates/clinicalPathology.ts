@@ -28,6 +28,7 @@ const urineRows: Row[] = [
 export const urine: ReportTemplate = {
   id: "urine",
   name: "Urine Routine & Microscopic (URM)",
+  specimen: "Urine",
   fields: fieldsOf(urineRows),
   build: (r) => [{ title: "URINE ROUTINE & MICROSCOPIC", columns: COLS_ROUTINE, rows: fillRows(urineRows, r), style: routineStyle }],
   sample: {
@@ -44,6 +45,8 @@ const uptRows: Row[] = [t("upt", "Urine Pregnancy Test")];
 export const upt: ReportTemplate = {
   id: "upt",
   name: "Urine Pregnancy Test (UPT)",
+  specimen: "Urine",
+  method: "Rapid Card Test",
   fields: fieldsOf(uptRows),
   build: (r) => [
     {
@@ -82,6 +85,7 @@ const stoolRows: Row[] = [
 export const stool: ReportTemplate = {
   id: "stool",
   name: "Stool Routine & Microscopic",
+  specimen: "Stool",
   fields: fieldsOf(stoolRows),
   build: (r) => [{ title: "STOOL ROUTINE & MICROSCOPIC", columns: COLS_ROUTINE, rows: fillRows(stoolRows, r), style: routineStyle }],
   sample: {
@@ -120,6 +124,7 @@ const red = (v: ResultValue | undefined): Rich => {
 export const semen: ReportTemplate<SemenResults> = {
   id: "semen",
   name: "Semen Analysis",
+  specimen: "Semen",
   fields: [
     { key: "volume", label: "Volume" },
     { key: "liquefaction", label: "Liquefaction Time" },

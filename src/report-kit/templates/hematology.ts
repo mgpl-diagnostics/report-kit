@@ -31,6 +31,8 @@ const cbcRows: Row[] = [
 export const cbc: ReportTemplate = {
   id: "cbc",
   name: "Complete Blood Count (CBC)",
+  specimen: "Whole Blood (EDTA)",
+  method: "Automated Cell Counter",
   fields: fieldsOf(cbcRows),
   build: (r, ctx) => [
     {
@@ -63,6 +65,7 @@ const hbRows: Row[] = [t("hb", "Haemoglobin", "gram/dl", "12 - 15", { rangeBySex
 export const hb: ReportTemplate = {
   id: "hb",
   name: "Haemoglobin (HB)",
+  specimen: "Whole Blood (EDTA)",
   fields: fieldsOf(hbRows),
   build: (r, ctx) => [
     { title: "HEMATOLOGY", columns: COLS_STD, rows: fillRows(hbRows, r, false, ctx), style: { titleSize: 14, abnormalBold: false } },
@@ -77,6 +80,7 @@ const bloodGroupRows: Row[] = [t("bloodGroup", "Blood Group")];
 export const bloodGroup: ReportTemplate = {
   id: "blood-group",
   name: "Blood Group",
+  specimen: "Whole Blood (EDTA)",
   fields: fieldsOf(bloodGroupRows),
   build: (r) => [
     { title: "HEMATOLOGY", columns: COLS_TWO, rows: fillRows(bloodGroupRows, r), style: { titleSize: 14, nameBold: true, resultBold: true } },
@@ -91,6 +95,8 @@ const mpRows: Row[] = [t("mp", "Mp By Card")];
 export const mp: ReportTemplate = {
   id: "mp",
   name: "Malaria Parasite (MP) by Card",
+  specimen: "Whole Blood (EDTA)",
+  method: "Rapid Card Test",
   fields: fieldsOf(mpRows),
   build: (r) => [
     { title: "HEMATOLOGY", columns: COLS_TWO, rows: fillRows(mpRows, r), style: { titleSize: 14, nameBold: true, resultBold: true } },
@@ -103,6 +109,8 @@ export const mp: ReportTemplate = {
 export const esr = panel({
   id: "esr",
   name: "ESR (Westergren)",
+  specimen: "Whole Blood (EDTA)",
+  method: "Westergren",
   category: "Hematology",
   title: "HEMATOLOGY",
   rows: [t("esr", "Erythrocyte Sedimentation Rate (ESR)", "mm/1st hr", "0 - 20", { rangeBySex: { male: "0 - 15", female: "0 - 20" } })],
@@ -115,6 +123,7 @@ export const esr = panel({
 export const btCt = panel({
   id: "bt-ct",
   name: "Bleeding Time / Clotting Time",
+  specimen: "Capillary Blood",
   category: "Hematology",
   title: "HEMATOLOGY",
   rows: [
@@ -131,6 +140,7 @@ export const btCt = panel({
 export const ptInr = panel({
   id: "pt-inr",
   name: "Prothrombin Time (PT / INR)",
+  specimen: "Citrated Plasma",
   category: "Hematology",
   title: "HEMATOLOGY",
   rows: [

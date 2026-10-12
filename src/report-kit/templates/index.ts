@@ -84,7 +84,9 @@ export function buildReport(patient: Patient, tests: TestInput[], opts: { endTex
     sections: tests.flatMap(({ template, results }) => {
       const tpl = typeof template === "string" ? TEMPLATES[template] : template;
       if (!tpl) throw new Error(`Unknown report template "${String(template)}"`);
-      return tpl.build(results as never, { patient });
+      return tpl
+        .build(results as never, { patient })
+        .map((s) => ({ ...s, subtitle: s.subtitle ?? tpl.name, specimen: s.specimen ?? tpl.specimen, method: s.method ?? tpl.method }));
     }),
   };
 }

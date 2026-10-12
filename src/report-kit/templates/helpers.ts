@@ -26,6 +26,9 @@ export interface ReportTemplate<R extends Results = Results> {
   /** Row keys this template understands (for building entry forms) */
   /** Department, for grouping in pickers */
   category?: string;
+  /** Printed under the test name (Navy Sidebar design) */
+  specimen?: string;
+  method?: string;
   fields: { key: string; label: string; unit?: string; range?: string | string[] }[];
   build(results: R, ctx: BuildContext): Section[];
   /** Results taken from the original Word design — used for the preview */
@@ -185,12 +188,16 @@ export function panel(def: {
   onlyFilled?: boolean;
   style?: SectionStyle;
   wide?: boolean;
+  specimen?: string;
+  method?: string;
   sample: Results;
 }): ReportTemplate {
   return {
     id: def.id,
     name: def.name,
     category: def.category,
+    specimen: def.specimen,
+    method: def.method,
     fields: fieldsOf(def.rows),
     build: (r, ctx) => [
       { title: def.title, columns: def.columns ?? COLS_STD, wide: def.wide, rows: fillRows(def.rows, r, def.onlyFilled, ctx), style: def.style },

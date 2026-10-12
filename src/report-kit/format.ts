@@ -9,6 +9,14 @@ export function formatDate(value: Date | string | undefined): string {
   return `${pad(d.getDate())}-${pad(d.getMonth() + 1)}-${d.getFullYear()}`;
 }
 
+/** DD-MM-YYYY hh:mm AM/PM. Strings are printed as-is. */
+export function formatDateTime(value: Date | string | undefined): string {
+  if (value === undefined) return "";
+  if (typeof value === "string") return value;
+  const h = value.getHours();
+  return `${formatDate(value)} ${pad(h % 12 || 12)}:${pad(value.getMinutes())} ${h < 12 ? "AM" : "PM"}`;
+}
+
 export function formatDoctor(ref: string | undefined): string {
   const v = (ref ?? "Self").trim();
   return /^dr\b/i.test(v) ? v : `Dr. ${v}`;

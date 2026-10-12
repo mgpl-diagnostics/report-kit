@@ -9,6 +9,7 @@ const style = { fontSize: 10, headingSize: 11, rowGap: 9, headingGap: 12, abnorm
 export const thyroid = panel({
   id: "thyroid",
   name: "Thyroid Profile (T3 / T4 / TSH)",
+  specimen: "Serum",
   category: "Immunoassay",
   title: TITLE,
   onlyFilled: true,
@@ -29,6 +30,7 @@ export const thyroid = panel({
 export const vitaminD = panel({
   id: "vitamin-d",
   name: "Vitamin D (25-OH)",
+  specimen: "Serum",
   category: "Immunoassay",
   title: TITLE,
   columns: COLS_LIPID,
@@ -40,6 +42,7 @@ export const vitaminD = panel({
 export const vitaminB12 = panel({
   id: "vitamin-b12",
   name: "Vitamin B12",
+  specimen: "Serum",
   category: "Immunoassay",
   title: TITLE,
   rows: [t("b12", "Vitamin B12 (Cyanocobalamin)", "pg/mL", "211 - 911")],
@@ -52,6 +55,7 @@ export const vitaminB12 = panel({
 export const psa = panel({
   id: "psa",
   name: "PSA (Prostate Specific Antigen)",
+  specimen: "Serum",
   category: "Immunoassay",
   title: TITLE,
   rows: [t("psa", "PSA - Total", "ng/mL", "0 - 4.0")],
