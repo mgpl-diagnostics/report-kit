@@ -22,6 +22,12 @@ const fonts = [
   ["carlito", "carlito-latin-700-italic.woff", "carlito-700-italic.woff"],
   ["archivo-black", "archivo-black-latin-400-normal.woff", "archivo-black-400.woff"],
   ["barlow-semi-condensed", "barlow-semi-condensed-latin-300-normal.woff", "barlow-semi-condensed-300.woff"],
+  // Navy Sidebar design
+  ["manrope", "manrope-latin-400-normal.woff", "manrope-400.woff"],
+  ["manrope", "manrope-latin-500-normal.woff", "manrope-500.woff"],
+  ["manrope", "manrope-latin-600-normal.woff", "manrope-600.woff"],
+  ["manrope", "manrope-latin-700-normal.woff", "manrope-700.woff"],
+  ["manrope", "manrope-latin-800-normal.woff", "manrope-800.woff"],
 ];
 for (const [pkg, file, out] of fonts) {
   copyFileSync(nm("@fontsource", pkg, "files", file), join(fontsDir, out));
