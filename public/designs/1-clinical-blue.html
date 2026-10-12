@@ -1,0 +1,146 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Design 1 — Clinical Blue</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#d9dce3}
+body{padding:24px 0}
+.page{position:relative;width:210mm;height:297mm;margin:0 auto;background:#fff;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.18);display:flex;flex-direction:column;padding:0 .45in;color:#111}
+.page img{display:block}
+.lh{display:flex;align-items:center;justify-content:space-between;padding-top:.3in}
+.logo{height:.95in}
+.contact{text-align:right;font-size:9pt;line-height:1.45}
+.ci{display:flex;align-items:center;justify-content:flex-end;gap:5px}
+.ci img{width:11px;height:11px}
+.patient{display:flex;justify-content:space-between;gap:.2in}
+.fields{display:grid;grid-template-columns:repeat(3,1fr);gap:4px 18px;flex:1}
+.f{display:flex;flex-direction:column}
+.k{font-size:7pt;text-transform:uppercase;letter-spacing:.06em;opacity:.65}
+.v{font-size:9.5pt}
+.v.strong{font-weight:700}
+.codes{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.barcode svg{width:1.45in;height:.36in;display:block}
+.qr{display:flex;flex-direction:column;align-items:center;font-size:6.5pt;gap:2px}
+.qr svg{width:.78in;height:.78in;display:block}
+.results{width:100%;border-collapse:collapse;font-size:8.6pt}
+.results col.c-name{width:45%}.results col.c-res{width:11%}.results col.c-flag{width:7%}.results col.c-unit{width:13%}.results col.c-range{width:24%}
+.results td.name{white-space:nowrap}
+.results th{text-align:left;font-weight:700}
+.results td,.results th{padding:2.6px 6px}
+.results .res,.results .flag,.results .unit,.results .range{text-align:center}
+.results .abbr{font-weight:600}
+.results tr.ab .res{font-weight:700}
+.pill{display:inline-block;min-width:15px;padding:0 4px;border-radius:3px;font-size:7pt;font-weight:700;line-height:13px;text-align:center;color:#fff}
+.pill.high{background:#d92d20}.pill.low{background:#1570ef}
+.test-title{font-weight:700;font-size:10.5pt;margin:2px 0 4px}
+.test-title small{display:block;font-weight:400;font-size:7.5pt;opacity:.7}
+.notes{font-size:7.5pt;margin-top:8px;line-height:1.5}
+.notes .pill{transform:scale(.9)}
+.end{text-align:center;font-size:7.5pt;letter-spacing:.2em;margin-top:8px;opacity:.7}
+footer{margin-top:auto;padding-bottom:.25in}
+.signs{display:flex;justify-content:flex-end;align-items:flex-end;gap:.5in}
+.qc img{width:.72in;height:.72in}
+.sign{display:flex;flex-direction:column;align-items:center;font-size:9pt}
+.sign img{width:1.4in;height:.47in;object-fit:contain}
+.legal{display:flex;justify-content:space-between;font-size:6.8pt;margin-top:8px;padding-top:5px;border-top:1px solid #ccd;opacity:.85}
+@media print{html,body{background:#fff;padding:0}.page{box-shadow:none;margin:0}}
+@page{size:A4;margin:0}
+
+.d1{font-family:Inter,sans-serif}
+.d1 .accent{height:4px;background:linear-gradient(90deg,#14264A,#2f5aa8);margin:.16in 0 .14in;border-radius:2px}
+.d1 .contact{color:#334}
+.d1 .patient{border:1px solid #d5dbe7;border-radius:8px;padding:10px 12px;background:#f7f9fc}
+.d1 .k{color:#14264A}
+.d1 .dept{margin:.16in 0 6px;font-size:11pt;letter-spacing:.14em;color:#14264A;border-bottom:2px solid #14264A;padding-bottom:3px}
+.d1 .results thead th{background:#14264A;color:#fff;font-weight:600}
+.d1 .results tbody tr:nth-child(even):not(.sub){background:#f3f6fb}
+.d1 .results tr.sub td{font-weight:700;color:#14264A;padding-top:6px;background:#fff}
+.d1 .results tr.ab .res{color:#d92d20}</style></head><body><div class="page d1">
+  
+  <header class="lh">
+    <img class="logo" src="../report-assets/logo.svg" alt="Maa Gayatri Path Lab">
+    <div class="contact">
+      <div class="addr">In front Of Police Station<br>Arang, Raipur, Chhattisgarh</div>
+      <div class="ci"><img src="../report-assets/icon-phone.svg" alt="">+91-9340638661</div>
+      <div class="ci"><img src="../report-assets/icon-email.svg" alt="">maagaytripatholgylab2006@gmail.com</div>
+    </div>
+  </header>
+  <div class="accent"></div>
+  <section class="patient">
+    <div class="fields">
+      <div class="f"><span class="k">Patient Name</span><span class="v strong">Mrs Kavita Sharma</span></div>
+      <div class="f"><span class="k">Age / Sex</span><span class="v">32 Year(s) / Female</span></div>
+      <div class="f"><span class="k">Patient ID</span><span class="v">MGPL1025</span></div>
+      <div class="f"><span class="k">Ref. Doctor</span><span class="v">Dr. A. K. Sharma</span></div>
+      <div class="f"><span class="k">Sample ID</span><span class="v">S2610120398</span></div>
+      <div class="f"><span class="k">Sample Type</span><span class="v">Whole Blood (EDTA)</span></div>
+      <div class="f"><span class="k">Collected</span><span class="v">12-10-2026 08:45 AM</span></div>
+      <div class="f"><span class="k">Registered</span><span class="v">12-10-2026 09:02 AM</span></div>
+      <div class="f"><span class="k">Reported</span><span class="v">12-10-2026 01:30 PM</span></div>
+    </div>
+    <div class="codes">
+      <div class="barcode"><svg viewBox="0 0 318 79" xmlns="http://www.w3.org/2000/svg">
+<path stroke="#000000" stroke-width="2" d="M1 63L1 0M9 63L9 0M29 63L29 0M49 63L49 0M53 63L53 0M61 63L61 0M65 63L65 0M69 63L69 0M73 63L73 0M97 63L97 0M117 63L117 0M125 63L125 0M129 63L129 0M141 63L141 0M145 63L145 0M169 63L169 0M177 63L177 0M181 63L181 0M193 63L193 0M197 63L197 0M221 63L221 0M225 63L225 0M241 63L241 0M245 63L245 0M265 63L265 0M281 63L281 0M285 63L285 0M289 63L289 0M297 63L297 0M317 63L317 0" />
+<path stroke="#000000" stroke-width="6" d="M15 63L15 0M23 63L23 0M35 63L35 0M43 63L43 0M83 63L83 0M91 63L91 0M103 63L103 0M111 63L111 0M135 63L135 0M155 63L155 0M163 63L163 0M187 63L187 0M207 63L207 0M215 63L215 0M231 63L231 0M251 63L251 0M259 63L259 0M275 63L275 0M303 63L303 0M311 63L311 0" />
+<path d="M73.23 70.26Q73.23 69.95 73.48 69.68Q73.74 69.44 74.04 69.44L76.85 70.33L76.85 67.58Q76.85 67.25 77.08 67.03Q77.33 66.80 77.66 66.80Q77.99 66.80 78.22 67.05Q78.47 67.27 78.47 67.58L78.47 70.33L81.02 69.53L81.02 69.53Q81.13 69.48 81.28 69.48Q81.60 69.48 81.84 69.72Q82.09 69.95 82.09 70.26Q82.09 70.81 81.51 71.00L79.31 71.72L80.75 74.08Q80.84 74.27 80.84 74.48Q80.84 74.81 80.61 75.03Q80.37 75.26 80.03 75.26Q79.67 75.26 79.45 75.07L77.88 72.46L75.85 75.07Q75.63 75.26 75.27 75.26Q74.93 75.26 74.69 75.03Q74.46 74.79 74.46 74.48Q74.46 74.25 74.62 74.01L76.32 71.80L73.79 71.00Q73.23 70.80 73.23 70.26ZM92.37 77.95Q92.14 77.69 92.14 77.32L92.14 65.48Q92.14 65.10 92.37 64.86Q92.63 64.60 92.95 64.60L94.35 64.60Q94.60 64.60 94.82 64.77Q95.01 64.96 95.09 65.21L96.48 70.12L97.87 65.21Q97.93 64.96 98.14 64.79Q98.36 64.60 98.61 64.60L100.01 64.60Q100.33 64.60 100.57 64.86Q100.82 65.12 100.82 65.48L100.82 77.32Q100.82 77.69 100.57 77.95Q100.33 78.19 100.01 78.19Q99.68 78.19 99.43 77.95Q99.19 77.69 99.19 77.34L99.19 66.59L97.24 73.49Q97.13 73.76 96.93 73.94Q96.75 74.11 96.48 74.11Q96.23 74.11 96.01 73.94Q95.81 73.76 95.74 73.50L93.77 66.59L93.77 77.34Q93.77 77.69 93.51 77.95Q93.28 78.19 92.95 78.19Q92.63 78.19 92.37 77.95ZM110.70 74.60Q110.28 73.09 110.28 71.37L110.28 71.32Q110.28 69.63 110.70 68.19Q111.12 66.73 111.91 65.90Q113.18 64.53 114.88 64.53Q115.22 64.53 115.56 64.58Q117.16 64.86 118.15 66.11Q118.35 66.35 118.35 66.68Q118.35 67.03 118.10 67.29Q117.86 67.53 117.54 67.53Q117.17 67.53 116.92 67.24Q116.14 66.30 114.93 66.30Q113.81 66.30 113.05 67.15Q112.49 67.78 112.22 68.85Q111.93 69.93 111.93 71.19Q111.93 73.02 112.44 74.55Q112.76 75.52 113.45 76.02Q114.14 76.52 115.09 76.52Q115.93 76.52 116.83 76.18L116.88 76.16L116.88 72.67L114.82 72.67Q114.50 72.67 114.28 72.43Q114.05 72.17 114.05 71.82Q114.05 71.46 114.28 71.21Q114.52 70.95 114.82 70.95L117.70 70.95Q118.02 70.95 118.26 71.21Q118.51 71.46 118.51 71.82L118.51 76.66Q118.51 76.91 118.39 77.10Q118.24 77.31 118.08 77.43Q117.92 77.55 117.61 77.69Q117.28 77.83 117.12 77.88Q116.97 77.93 116.69 78.02Q115.89 78.26 115.06 78.26Q113.10 78.26 111.91 76.92Q111.13 76.09 110.70 74.60ZM128.90 77.93Q128.65 77.67 128.65 77.31L128.65 65.62Q128.65 65.26 128.88 65.00Q129.12 64.74 129.46 64.74L132.50 64.74Q134.38 64.74 135.59 65.73Q136.82 66.72 136.82 68.59Q136.82 70.00 136.13 70.92Q135.03 72.44 132.50 72.44L130.27 72.44L130.27 77.31Q130.27 77.69 130.02 77.95Q129.78 78.19 129.46 78.19Q129.13 78.19 128.90 77.93M130.27 66.47L130.27 70.73L132.50 70.73Q135.10 70.73 135.19 68.71L135.19 68.59Q135.19 67.41 134.45 66.94Q133.75 66.47 132.50 66.47L130.27 66.47ZM146.90 77.55Q146.65 77.29 146.65 76.94L146.65 65.40Q146.65 65.05 146.88 64.81Q147.13 64.55 147.46 64.55Q147.78 64.55 148.02 64.81Q148.27 65.05 148.27 65.40L148.27 76.07L154.01 76.07Q154.35 76.07 154.58 76.33Q154.82 76.59 154.82 76.94Q154.82 77.29 154.57 77.55Q154.33 77.81 154.01 77.81L147.46 77.81Q147.13 77.81 146.90 77.55ZM164.93 68.73Q164.70 68.49 164.70 68.17Q164.70 67.81 164.93 67.64L168.24 64.91Q168.48 64.72 168.77 64.72L169.35 64.72Q169.67 64.72 169.91 64.96Q170.16 65.19 170.16 65.50L170.16 77.31Q170.16 77.62 169.91 77.86Q169.67 78.09 169.35 78.09Q169.02 78.09 168.77 77.86Q168.53 77.64 168.53 77.31L168.53 66.73L166.06 68.76Q165.82 68.96 165.51 68.96Q165.17 68.96 164.93 68.73ZM186.55 78.14L186.48 78.14Q185.41 78.12 184.62 77.79Q183.82 77.48 183.35 76.98Q182.88 76.45 182.61 75.64Q182.32 74.82 182.23 73.99Q182.14 73.17 182.14 72.06Q182.14 71.07 182.16 70.38Q182.19 69.67 182.30 68.85Q182.41 68.02 182.59 67.46Q182.79 66.89 183.12 66.32Q183.44 65.76 183.89 65.43Q184.35 65.10 185.00 64.89Q185.65 64.68 186.48 64.68Q187.29 64.68 187.94 64.89Q188.59 65.10 189.05 65.43Q189.50 65.76 189.84 66.32Q190.17 66.89 190.35 67.46Q190.55 68.04 190.66 68.85Q190.76 69.67 190.78 70.38Q190.82 71.09 190.82 72.06Q190.82 72.76 190.78 73.33Q190.75 73.89 190.62 74.55Q190.51 75.21 190.33 75.71Q190.15 76.19 189.81 76.66Q189.46 77.13 189.03 77.44Q188.59 77.76 187.96 77.95Q187.33 78.14 186.55 78.14M183.77 70.64L183.77 72.06Q183.77 72.84 183.80 73.40Q183.86 73.96 184.02 74.60Q184.16 75.24 184.45 75.64Q184.74 76.06 185.25 76.33Q185.76 76.59 186.48 76.59L186.86 76.59Q187.37 76.59 187.76 76.40Q188.16 76.19 188.40 75.81Q188.65 75.45 188.81 75.03Q188.97 74.60 189.05 74.06Q189.14 73.50 189.16 73.05Q189.19 72.60 189.19 72.06L189.19 71.26Q189.19 70.73 189.17 70.41Q189.17 70.08 189.16 69.60Q189.14 69.09 189.08 68.82Q189.03 68.52 188.94 68.12Q188.85 67.72 188.70 67.48Q188.56 67.24 188.36 66.98Q188.14 66.72 187.89 66.58Q187.62 66.42 187.26 66.33Q186.91 66.25 186.48 66.25Q186.03 66.25 185.67 66.35Q185.32 66.44 185.05 66.61Q184.78 66.79 184.56 67.05Q184.36 67.29 184.22 67.60Q184.07 67.90 183.98 68.26Q183.89 68.61 183.86 69.01Q183.82 69.39 183.78 69.81Q183.77 70.21 183.77 70.64ZM200.68 66.91Q200.45 66.66 200.45 66.37Q200.45 65.93 200.79 65.71Q202.44 64.67 204.48 64.67Q206.12 64.67 207.23 65.67Q208.35 66.66 208.35 68.28Q208.35 68.92 208.11 69.51Q207.88 70.12 207.57 70.50Q207.28 70.88 206.70 71.35Q206.12 71.82 205.82 72.03Q205.53 72.24 204.90 72.64Q204.21 73.07 203.90 73.30Q203.59 73.52 203.16 73.97Q202.73 74.41 202.53 74.96Q202.33 75.50 202.29 76.25L202.29 76.33L207.64 76.33Q207.99 76.33 208.22 76.58Q208.46 76.80 208.46 77.11Q208.46 77.43 208.20 77.67Q207.97 77.90 207.64 77.90L201.46 77.90Q201.13 77.90 200.88 77.67Q200.65 77.43 200.65 77.11L200.65 76.75Q200.65 75.40 200.83 74.81Q201.13 73.76 201.98 72.95Q202.83 72.12 204.06 71.32Q205.76 70.22 206.22 69.60Q206.72 68.97 206.72 68.28Q206.72 67.36 206.05 66.79Q205.42 66.23 204.48 66.23Q202.85 66.23 201.73 66.99Q201.53 67.13 201.26 67.13Q200.93 67.13 200.68 66.91ZM218.84 77.91Q218.61 77.69 218.61 77.36Q218.61 77.01 218.84 76.78Q219.10 76.56 219.42 76.56Q223.08 76.56 224.14 74.60Q224.47 74.01 224.47 73.47Q224.47 72.20 223.85 71.56Q223.04 70.64 221.00 70.64Q220.44 70.64 219.86 70.69L219.78 70.69Q219.46 70.69 219.21 70.48Q218.97 70.26 218.97 69.95L218.97 69.89L219.22 65.47Q219.26 65.15 219.48 64.95Q219.71 64.74 220.04 64.74L225.17 64.74Q225.52 64.74 225.75 64.98Q225.99 65.21 225.99 65.52Q225.99 65.83 225.73 66.07Q225.50 66.32 225.17 66.32L220.80 66.32L220.65 69.04L221.00 69.04Q223.29 69.04 224.69 70.17Q226.10 71.28 226.10 73.47Q226.10 74.39 225.68 75.19Q225.25 76.00 224.59 76.58Q222.86 78.14 219.42 78.14Q219.10 78.14 218.84 77.91M219.84 70.69Q219.84 70.69 219.86 70.69Q219.86 70.69 219.84 70.69ZM236.23 70.26Q236.23 69.95 236.48 69.68Q236.74 69.44 237.04 69.44L239.85 70.33L239.85 67.58Q239.85 67.25 240.08 67.03Q240.33 66.80 240.66 66.80Q240.99 66.80 241.22 67.05Q241.47 67.27 241.47 67.58L241.47 70.33L244.02 69.53L244.02 69.53Q244.13 69.48 244.28 69.48Q244.60 69.48 244.84 69.72Q245.09 69.95 245.09 70.26Q245.09 70.81 244.51 71.00L242.31 71.72L243.75 74.08Q243.84 74.27 243.84 74.48Q243.84 74.81 243.61 75.03Q243.37 75.26 243.03 75.26Q242.67 75.26 242.45 75.07L240.88 72.46L238.85 75.07Q238.63 75.26 238.27 75.26Q237.93 75.26 237.69 75.03Q237.46 74.79 237.46 74.48Q237.46 74.25 237.62 74.01L239.32 71.80L236.79 71.00Q236.23 70.80 236.23 70.26Z" fill="#000000" />
+</svg>
+</div>
+      <div class="qr"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 29 29" shape-rendering="crispEdges"><path fill="#ffffff" d="M0 0h29v29H0z"/><path stroke="#000000" d="M0 0.5h7m3 0h3m2 0h2m1 0h3m1 0h7M0 1.5h1m5 0h1m2 0h4m9 0h1m5 0h1M0 2.5h1m1 0h3m1 0h1m1 0h2m1 0h1m2 0h1m1 0h1m2 0h2m1 0h1m1 0h3m1 0h1M0 3.5h1m1 0h3m1 0h1m1 0h4m5 0h1m2 0h1m1 0h1m1 0h3m1 0h1M0 4.5h1m1 0h3m1 0h1m1 0h2m1 0h5m3 0h2m1 0h1m1 0h3m1 0h1M0 5.5h1m5 0h1m1 0h3m2 0h3m1 0h2m1 0h1m1 0h1m5 0h1M0 6.5h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7M8 7.5h3m1 0h2m4 0h3M0 8.5h1m1 0h5m2 0h4m1 0h1m2 0h1m1 0h1m2 0h5M1 9.5h2m5 0h2m5 0h1m1 0h3m1 0h2m1 0h1m3 0h1M0 10.5h5m1 0h2m1 0h1m2 0h1m2 0h2m1 0h1m1 0h1m1 0h1m1 0h1M0 11.5h1m8 0h3m2 0h2m4 0h4m1 0h1m1 0h1M0 12.5h2m2 0h3m2 0h1m1 0h2m2 0h1m1 0h1m7 0h2M0 13.5h1m2 0h2m2 0h1m3 0h1m1 0h3m2 0h7m3 0h1M0 14.5h2m2 0h3m1 0h1m4 0h3m1 0h1m6 0h3M0 15.5h2m1 0h1m8 0h2m1 0h1m2 0h1m1 0h1m3 0h1m2 0h1M0 16.5h1m1 0h1m1 0h4m1 0h3m2 0h1m2 0h1m1 0h1m3 0h1m1 0h2M0 17.5h1m1 0h2m1 0h1m1 0h1m1 0h1m1 0h1m3 0h3m1 0h2m1 0h3m1 0h1m1 0h1M0 18.5h1m3 0h3m4 0h2m5 0h1m2 0h3m2 0h1M0 19.5h1m7 0h2m2 0h1m1 0h1m1 0h1m4 0h1m1 0h2m2 0h1M0 20.5h1m1 0h7m1 0h1m1 0h1m4 0h2m1 0h5m1 0h3M8 21.5h1m4 0h2m3 0h3m3 0h5M0 22.5h7m2 0h1m1 0h1m1 0h4m1 0h3m1 0h1m1 0h3M0 23.5h1m5 0h1m1 0h1m2 0h1m1 0h1m1 0h2m1 0h3m3 0h1m3 0h1M0 24.5h1m1 0h3m1 0h1m1 0h1m1 0h3m1 0h1m1 0h1m3 0h5m1 0h3M0 25.5h1m1 0h3m1 0h1m1 0h1m1 0h2m3 0h5m5 0h2M0 26.5h1m1 0h3m1 0h1m1 0h10m1 0h9M0 27.5h1m5 0h1m2 0h1m1 0h1m3 0h3m2 0h2m1 0h3m1 0h1M0 28.5h7m1 0h1m4 0h3m1 0h3m3 0h1m2 0h1"/></svg>
+<span>Scan to verify</span></div>
+    </div>
+  </section>
+  <div class="plain">
+    <h2 class="dept"><span>HEMATOLOGY</span></h2>
+    <div class="test-title">Complete Blood Count (CBC)<small>Method: Automated Cell Counter &nbsp;•&nbsp; Specimen: Whole Blood (EDTA)</small></div>
+    <table class="results">
+      <colgroup><col class="c-name"><col class="c-res"><col class="c-flag"><col class="c-unit"><col class="c-range"></colgroup>
+      <thead><tr><th class="name">Test Description</th><th class="res">Result</th><th class="flag">Flag</th><th class="unit">Unit</th><th class="range">Biological Ref. Interval</th></tr></thead>
+      <tbody><tr class="sub"><td colspan="5">COMPLETE BLOOD COUNT</td></tr><tr class="ab"><td class="name">Haemoglobin <span class="abbr">(HB)</span></td>
+      <td class="res">10.8</td><td class="flag"><span class="pill low">L</span></td>
+      <td class="unit">g/dL</td><td class="range">12.0 - 15.0</td></tr><tr class=""><td class="name">Erythrocyte Count <span class="abbr">(RBC Count)</span></td>
+      <td class="res">4.23</td><td class="flag"></td>
+      <td class="unit">Mil/cum</td><td class="range">3.8 - 4.8</td></tr><tr class=""><td class="name">PCV-Packed Cell Volume <span class="abbr">(Haematocrit, HCT)</span></td>
+      <td class="res">36.6</td><td class="flag"></td>
+      <td class="unit">%</td><td class="range">36 - 46</td></tr><tr class=""><td class="name">Platelet Count <span class="abbr">(PLT)</span></td>
+      <td class="res">2.45</td><td class="flag"></td>
+      <td class="unit">Lakh/Cum</td><td class="range">1.50 - 4.10</td></tr></tbody><tbody><tr class="sub"><td colspan="5">Erythrocyte Indices</td></tr><tr class="ab"><td class="name">Mean Corpuscular Volume <span class="abbr">(MCV)</span></td>
+      <td class="res">82.03</td><td class="flag"><span class="pill low">L</span></td>
+      <td class="unit">FL</td><td class="range">83 - 101</td></tr><tr class=""><td class="name">Mean Corpuscular Haemoglobin <span class="abbr">(MCH)</span></td>
+      <td class="res">28.24</td><td class="flag"></td>
+      <td class="unit">pg</td><td class="range">27 - 32</td></tr><tr class="ab"><td class="name">Mean Corpuscular Haemoglobin Concentration <span class="abbr">(MCHC)</span></td>
+      <td class="res">77.8</td><td class="flag"><span class="pill high">H</span></td>
+      <td class="unit">g/dl</td><td class="range">31.5 - 34.5</td></tr><tr class=""><td class="name">Red blood cell Distribution Width <span class="abbr">(RDW-CV)</span></td>
+      <td class="res">12.7</td><td class="flag"></td>
+      <td class="unit">%</td><td class="range">11.6 - 16.0</td></tr></tbody><tbody><tr class="sub"><td colspan="5">Total Leukocyte &amp; Differential Count</td></tr><tr class=""><td class="name">Total Leucocyte Count <span class="abbr">(WBC)</span></td>
+      <td class="res">6700</td><td class="flag"></td>
+      <td class="unit">Cells/Cumm</td><td class="range">4000 - 10000</td></tr><tr class=""><td class="name">Neutrophils</td>
+      <td class="res">66</td><td class="flag"></td>
+      <td class="unit">%</td><td class="range">40 - 80</td></tr><tr class=""><td class="name">Lymphocytes</td>
+      <td class="res">32</td><td class="flag"></td>
+      <td class="unit">%</td><td class="range">20 - 40</td></tr><tr class=""><td class="name">Eosinophils</td>
+      <td class="res">01</td><td class="flag"></td>
+      <td class="unit">%</td><td class="range">01 - 06</td></tr><tr class="ab"><td class="name">Monocytes</td>
+      <td class="res">01</td><td class="flag"><span class="pill low">L</span></td>
+      <td class="unit">%</td><td class="range">02 - 10</td></tr><tr class="ab"><td class="name">Basophils</td>
+      <td class="res">00</td><td class="flag"><span class="pill low">L</span></td>
+      <td class="unit">%</td><td class="range">&lt;1 - 2</td></tr><tr class="ab"><td class="name">Erythrocyte Sedimentation Rate <span class="abbr">(ESR)</span></td>
+      <td class="res">32</td><td class="flag"><span class="pill high">H</span></td>
+      <td class="unit">Mm/Hour</td><td class="range">&lt;20</td></tr></tbody><tbody><tr class="sub"><td colspan="5">Platelet Indices</td></tr><tr class=""><td class="name">Platelet Distribution Width <span class="abbr">(PDW)</span></td>
+      <td class="res">15.0</td><td class="flag"></td>
+      <td class="unit">%</td><td class="range">9.0 – 17.0</td></tr><tr class=""><td class="name">Mean Platelet Volume <span class="abbr">(MPV)</span></td>
+      <td class="res">9.1</td><td class="flag"></td>
+      <td class="unit">%</td><td class="range">06.5 – 12.0</td></tr><tr class=""><td class="name">Plateletcrit <span class="abbr">(PCT)</span></td>
+      <td class="res">0.279</td><td class="flag"></td>
+      <td class="unit">%</td><td class="range">0.108 – 0.282</td></tr></tbody></table>
+  </div>
+  <div class="notes"><b>Note:</b> Values marked <span class="pill high">H</span> / <span class="pill low">L</span> are above / below the biological reference interval. Results should be correlated clinically.</div>
+  <div class="end">— End of Report —</div>
+  <footer>
+    <div class="signs">
+      <div class="qc"><img src="../report-assets/qc-stamp.svg" alt="QC approved"></div>
+      <div class="sign"><img src="../report-assets/signature-scan.jpg" alt="Signature"><b>Dr.Gulab Singh (B.Sc., D.M.L.T.)</b><span>Lab Tech. / Pathologist</span></div>
+    </div>
+    <div class="legal"><span>This is an electronically verified report. Scan the QR code to confirm authenticity.</span><span>Page 1 of 1</span></div>
+  </footer>
+</div></body></html>

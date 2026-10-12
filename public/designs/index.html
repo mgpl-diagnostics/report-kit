@@ -1,0 +1,32 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MGPL — Report Designs</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,'Segoe UI',sans-serif;background:#f4f5f8;color:#1c2230;padding:28px 16px}
+h1{margin:0 0 4px;color:#14264A;font-size:24px}header p{margin:0 0 24px;color:#667085}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:22px;max-width:1180px}
+article{background:#fff;border-radius:12px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.frame{position:relative;width:100%;aspect-ratio:210/297;overflow:hidden;border-radius:6px;background:#d9dce3}
+.frame iframe{position:absolute;left:0;top:0;width:820px;height:1160px;border:0;transform-origin:0 0;pointer-events:none}
+h2{font-size:17px;margin:12px 0 2px;display:flex;align-items:center;gap:8px}
+h2 span{background:#14264A;color:#fff;border-radius:6px;font-size:13px;width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center}
+p{margin:2px 0;font-size:13px;color:#475467}.font{color:#C2410C;font-weight:600}
+a{display:inline-block;margin-top:8px;color:#14264A;font-weight:600;font-size:13px}
+</style></head><body>
+<header><h1>Report design options</h1><p>Same CBC report in 6 layouts — each with barcode + QR code. Tell me the number you like.</p></header>
+<div class="grid"><article><div class="frame"><iframe src="1-clinical-blue.html" loading="lazy" title="Clinical Blue" tabindex="-1"></iframe></div>
+  <h2><span>1</span>Clinical Blue</h2><p class="font">Inter</p><p>Clean hospital style. Navy accents, zebra rows, rounded patient card.</p><a href="1-clinical-blue.html" target="_blank">Open full size</a></article>
+<article><div class="frame"><iframe src="2-heritage-serif.html" loading="lazy" title="Heritage Serif" tabindex="-1"></iframe></div>
+  <h2><span>2</span>Heritage Serif</h2><p class="font">Lora + Source Sans 3</p><p>Classic, authoritative. Centered letterhead, double rules, serif headings.</p><a href="2-heritage-serif.html" target="_blank">Open full size</a></article>
+<article><div class="frame"><iframe src="3-saffron-brand.html" loading="lazy" title="Saffron Brand" tabindex="-1"></iframe></div>
+  <h2><span>3</span>Saffron Brand</h2><p class="font">Poppins + Nunito Sans</p><p>Uses the new logo's navy, saffron and gold. Warm and distinctive.</p><a href="3-saffron-brand.html" target="_blank">Open full size</a></article>
+<article><div class="frame"><iframe src="4-navy-sidebar.html" loading="lazy" title="Navy Sidebar" tabindex="-1"></iframe></div>
+  <h2><span>4</span>Navy Sidebar</h2><p class="font">Manrope</p><p>Bold vertical brand strip on the left. Modern and memorable.</p><a href="4-navy-sidebar.html" target="_blank">Open full size</a></article>
+<article><div class="frame"><iframe src="5-mono-precision.html" loading="lazy" title="Mono Precision" tabindex="-1"></iframe></div>
+  <h2><span>5</span>Mono Precision</h2><p class="font">IBM Plex Sans + IBM Plex Mono</p><p>Black & white, printer-friendly. Results in monospace so digits line up.</p><a href="5-mono-precision.html" target="_blank">Open full size</a></article>
+<article><div class="frame"><iframe src="6-card-modern.html" loading="lazy" title="Card Modern" tabindex="-1"></iframe></div>
+  <h2><span>6</span>Card Modern</h2><p class="font">DM Sans</p><p>Soft cards and chips. Friendly, app-like look that suits WhatsApp/PDF sharing.</p><a href="6-card-modern.html" target="_blank">Open full size</a></article></div>
+<script>
+// scale each A4 iframe to its card width
+function fit(){document.querySelectorAll('.frame').forEach(f=>{const i=f.querySelector('iframe');i.style.transform='scale('+(f.clientWidth/820)+')';});}
+addEventListener('resize',fit);fit();
+</script></body></html>
