@@ -3,6 +3,7 @@ import { extname, join } from "node:path";
 import { Resvg } from "@resvg/resvg-js";
 import { Font } from "@react-pdf/renderer";
 import { FONTS } from "../layout";
+import { SB_FONT } from "../sidebar/layout";
 
 /** Image ready for react-pdf's <Image src={...}> */
 export interface PdfImage {
@@ -78,6 +79,11 @@ export function registerFonts(fontDir: string) {
   });
   Font.register({ family: FONTS.title, src: f("archivo-black-400.woff") });
   Font.register({ family: FONTS.address, src: f("barlow-semi-condensed-300.woff"), fontWeight: 300 });
+  // Navy Sidebar design
+  Font.register({
+    family: SB_FONT,
+    fonts: [400, 500, 600, 700, 800].map((w) => ({ src: f(`manrope-${w}.woff`), fontWeight: w })),
+  });
   // Never hyphenate medical terms
   Font.registerHyphenationCallback((word) => [word]);
   registeredFrom = fontDir;

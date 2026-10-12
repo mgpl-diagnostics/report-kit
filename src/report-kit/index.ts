@@ -1,11 +1,18 @@
 // Maa Gayatri Path Lab — report kit.
 // Copy this whole folder (plus /public/report-assets) into any React / Next.js app.
 
+export { LabReport, type LabReportProps } from "./LabReport";
 export { ReportDocument, type ReportDocumentProps } from "./ReportDocument";
+export { SidebarLetterhead, SidebarReport, type SidebarReportProps } from "./sidebar/SidebarReport";
+export { sidebarCss } from "./sidebar/styles";
+export { sbLayoutPages, sbRowHeight } from "./sidebar/measure";
+export * as SIDEBAR_LAYOUT from "./sidebar/layout";
+export { qrSvg, reportQrValue } from "./qr";
+export { barcodeSvg } from "./barcode";
 export { reportCss } from "./styles";
 export * as LAYOUT from "./layout";
 export { MGPL_LAB } from "./lab";
-export { formatDate, formatDoctor, fullName, resolveFlag } from "./format";
+export { formatDate, formatDateTime, formatDoctor, fullName, resolveFlag } from "./format";
 export { headerCells, layoutPages, rowBox } from "./measure";
 export * from "./templates";
 export * from "./types";
