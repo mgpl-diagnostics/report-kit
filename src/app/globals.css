@@ -1,0 +1,60 @@
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: #e8eaee;
+  color: #1c2230;
+}
+
+.app { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+
+.sidebar {
+  position: sticky; top: 0; height: 100vh; overflow-y: auto;
+  background: #fff; border-right: 1px solid #d9dde4; padding: 20px 14px;
+}
+.sidebar h1 { font-size: 15px; margin: 0 0 4px; color: #162884; }
+.sidebar p { font-size: 12px; color: #667085; margin: 0 0 16px; }
+.sidebar nav { display: flex; flex-direction: column; gap: 2px; }
+.sidebar a {
+  display: block; padding: 8px 10px; border-radius: 6px;
+  color: #1c2230; text-decoration: none; font-size: 14px;
+}
+.sidebar a:hover { background: #f1f3f7; }
+.sidebar a[aria-current="page"] { background: #162884; color: #fff; }
+
+.main { padding: 20px 24px 48px; min-width: 0; }
+.toolbar {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+  max-width: 210mm; margin: 0 auto 18px;
+}
+.toolbar .spacer { flex: 1; }
+.toolbar .meta { font-size: 12px; color: #667085; width: 100%; }
+
+.seg { display: inline-flex; border: 1px solid #c4cad4; border-radius: 8px; overflow: hidden; background: #fff; }
+.seg a { padding: 7px 14px; font-size: 13px; color: #1c2230; text-decoration: none; }
+.seg a + a { border-left: 1px solid #c4cad4; }
+.seg a[aria-current="true"] { background: #162884; color: #fff; }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 14px; border-radius: 8px; font-size: 13px; font-weight: 600;
+  border: 1px solid #162884; background: #162884; color: #fff; cursor: pointer; text-decoration: none;
+  font-family: inherit;
+}
+.btn.secondary { background: #fff; color: #162884; }
+
+.preview { overflow-x: auto; padding-bottom: 8px; }
+
+@media (max-width: 900px) {
+  .app { grid-template-columns: 1fr; }
+  .sidebar { position: static; height: auto; }
+  .sidebar nav { flex-direction: row; flex-wrap: wrap; }
+}
+
+@media print {
+  body { background: #fff; }
+  .app { display: block; }
+  .sidebar, .toolbar { display: none !important; }
+  .main { padding: 0; }
+  .preview { overflow: visible; padding: 0; }
+}
