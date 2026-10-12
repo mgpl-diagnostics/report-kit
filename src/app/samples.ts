@@ -161,7 +161,20 @@ export const SAMPLES: Sample[] = [
   })),
 ];
 
+/** Demo sample metadata derived from the collection date (DD-MM-YYYY). */
+function withSampleMeta(p: Patient): Patient {
+  const date = typeof p.sampleCollectionDate === "string" ? p.sampleCollectionDate : "12-10-2026";
+  const [d, m, y] = date.split("-");
+  return {
+    sampleId: `S${y?.slice(2)}${m}${d}${(p.patientId ?? "0").replace(/\D/g, "").padStart(4, "0")}`,
+    collectedAt: `${date} 08:45 AM`,
+    registeredAt: `${date} 09:02 AM`,
+    reportedAt: `${date} 01:30 PM`,
+    ...p,
+  };
+}
+
 export function getSampleReport(id: string): Report | undefined {
   const s = SAMPLES.find((x) => x.id === id);
-  return s && buildReport(s.patient, s.tests);
+  return s && buildReport(withSampleMeta(s.patient), s.tests);
 }

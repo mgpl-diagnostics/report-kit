@@ -12,15 +12,17 @@ body {
   position: sticky; top: 0; height: 100vh; overflow-y: auto;
   background: #fff; border-right: 1px solid #d9dde4; padding: 20px 14px;
 }
-.sidebar h1 { font-size: 15px; margin: 0 0 4px; color: #162884; }
+.sidebar h1 { font-size: 15px; margin: 0 0 4px; color: #14264a; }
 .sidebar p { font-size: 12px; color: #667085; margin: 0 0 16px; }
 .sidebar nav { display: flex; flex-direction: column; gap: 2px; }
+.sidebar h2 { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: #667085; margin: 16px 10px 6px; }
+.sidebar p a { color: #c2410c; font-weight: 600; text-decoration: none; font-size: 13px; }
 .sidebar a {
   display: block; padding: 8px 10px; border-radius: 6px;
   color: #1c2230; text-decoration: none; font-size: 14px;
 }
 .sidebar a:hover { background: #f1f3f7; }
-.sidebar a[aria-current="page"] { background: #162884; color: #fff; }
+.sidebar nav a[aria-current="page"] { background: #14264a; color: #fff; }
 
 .main { padding: 20px 24px 48px; min-width: 0; }
 .toolbar {
@@ -33,7 +35,7 @@ body {
 .seg { display: inline-flex; border: 1px solid #c4cad4; border-radius: 8px; overflow: hidden; background: #fff; }
 .seg a { padding: 7px 14px; font-size: 13px; color: #1c2230; text-decoration: none; }
 .seg a + a { border-left: 1px solid #c4cad4; }
-.seg a[aria-current="true"] { background: #162884; color: #fff; }
+.seg a[aria-current="true"] { background: #14264a; color: #fff; }
 
 .btn {
   display: inline-flex; align-items: center; gap: 6px;
