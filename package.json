@@ -1,26 +1,60 @@
 {
-  "name": "mgpl-report-kit",
+  "name": "@mgpl-diagnostics/report-kit",
   "version": "1.0.0",
-  "private": true,
+  "description": "MGPL Diagnostics lab reports: React (HTML) + pure Node.js A4 PDF, header / non-header, Navy Sidebar & classic designs.",
   "type": "module",
-  "description": "Maa Gayatri Path Lab report kit for Next.js: header / non-header A4 reports, live preview and PDF export.",
+  "license": "UNLICENSED",
+  "repository": "github:mgpl-diagnostics/report-kit",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./pdf": {
+      "types": "./dist/pdf/index.d.ts",
+      "import": "./dist/pdf/index.js"
+    },
+    "./server": {
+      "types": "./dist/server.d.ts",
+      "import": "./dist/server.js"
+    },
+    "./assets/*": "./assets/*",
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "mgpl-report-assets": "bin/copy-assets.mjs"
+  },
+  "files": [
+    "dist",
+    "assets",
+    "bin",
+    "docs",
+    "README.md",
+    "AGENTS.md",
+    "llms.txt"
+  ],
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
+    "build": "tsup",
     "typecheck": "tsc --noEmit",
     "assets": "node scripts/sync-assets.mjs",
-    "examples": "tsx scripts/generate-examples.tsx",
-    "smoke": "tsx scripts/smoke-test.tsx"
+    "smoke": "tsx scripts/smoke-test.tsx",
+    "examples": "tsx scripts/generate-examples.tsx"
   },
   "dependencies": {
     "@react-pdf/renderer": "^4.9.0",
     "@resvg/resvg-js": "^2.6.2",
     "bwip-js": "^4.11.4",
-    "next": "^16.4.0",
-    "qrcode": "^1.5.4",
-    "react": "^19.3.0",
-    "react-dom": "^19.3.0"
+    "qrcode": "^1.5.4"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "engines": {
+    "node": ">=20"
   },
   "devDependencies": {
     "@fontsource/archivo-black": "^5.3.0",
@@ -35,7 +69,14 @@
     "@types/react-dom": "^19.3.0",
     "fontkit": "^2.0.4",
     "opentype.js": "^2.0.0",
+    "pdfjs-dist": "^6.4.299",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "tsup": "^8.5.0",
     "tsx": "^4.23.15",
     "typescript": "^5.9.3"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
   }
 }

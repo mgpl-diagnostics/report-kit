@@ -46,7 +46,7 @@ export function SidebarReportPdf({ report, variant, lab, images }: { report: Rep
     <Document title={`${report.patient.name} - Lab Report`} author={lab.name} creator={lab.name} producer={lab.name}>
       {pages.map((page, n) => (
         <Page key={n} size="A4" style={pageStyle}>
-          {variant === "header" && <Letterhead lab={lab} images={images} />}
+          {variant === "header" && <SbLetterheadPdf lab={lab} images={images} />}
           <PatientBlock report={report} />
           {images.barcode && (
             <Image src={images.barcode} style={{ position: "absolute", left: i(SB_RIGHT - p.barcode.w), top: i(p.y), width: i(p.barcode.w), height: i(p.barcode.h), objectFit: "fill" }} />
@@ -110,7 +110,7 @@ export function SidebarLetterheadPdf({ lab, images }: { lab: LabProfile; images:
   return (
     <Document title={`${lab.name} - Letterhead`} author={lab.name} creator={lab.name} producer={lab.name}>
       <Page size="A4" style={pageStyle}>
-        <Letterhead lab={lab} images={images} />
+        <SbLetterheadPdf lab={lab} images={images} />
       </Page>
     </Document>
   );
@@ -118,7 +118,8 @@ export function SidebarLetterheadPdf({ lab, images }: { lab: LabProfile; images:
 
 /* ---------------------------------------------------------------- letterhead */
 
-function Letterhead({ lab, images }: { lab: LabProfile; images: Pick<SbPdfImages, "logo" | "email" | "phone"> }) {
+/** Letterhead layer (sidebar + header + footer), shared with the invoice kit. */
+export function SbLetterheadPdf({ lab, images }: { lab: LabProfile; images: Pick<SbPdfImages, "logo" | "email" | "phone"> }) {
   const H = SB_HEADER;
   const lineH = H.contact.lineHeight;
   const contactRow = (children: ReactNode, k: number, icon?: PdfImage) => (

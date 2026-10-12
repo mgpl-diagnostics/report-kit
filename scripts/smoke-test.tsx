@@ -25,14 +25,14 @@ import {
   type ReportVariant,
   type Rich,
   type Row,
-} from "../src/report-kit";
-import { renderLetterheadPdf, renderReportPdf } from "../src/report-kit/pdf";
-import { gridColumns, isTwoColumn, LEGAL, LEGEND, patientFields, sectionMeta, TWO_COL_RESULT_W } from "../src/report-kit/sidebar/model";
-import { displayRows, subtitleOf } from "../src/report-kit/sidebar/measure";
-import { getSampleReport, SAMPLES } from "../src/app/samples";
+} from "../src";
+import { renderLetterheadPdf, renderReportPdf } from "../src/pdf";
+import { gridColumns, isTwoColumn, LEGAL, LEGEND, patientFields, sectionMeta, TWO_COL_RESULT_W } from "../src/sidebar/model";
+import { displayRows, subtitleOf } from "../src/sidebar/measure";
+import { getSampleReport, SAMPLES } from "../src/samples";
 
 const root = process.cwd();
-const fontDir = join(root, "public", "report-fonts");
+const fontDir = join(root, "assets", "report-fonts");
 const open = (f: string) => fontkit.openSync(join(fontDir, f)) as fontkit.Font;
 const carlito = { 400: open("carlito-400.woff"), 700: open("carlito-700.woff") };
 const manrope = { 400: open("manrope-400.woff"), 600: open("manrope-600.woff"), 700: open("manrope-700.woff"), 800: open("manrope-800.woff") };
@@ -152,6 +152,21 @@ function expectedValues(report: Report): string[] {
   return out.filter(Boolean);
 }
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+/** All text in a PDF (Mozilla pdf.js), whitespace removed — used to prove values were really drawn. */
+async function pdfText(buf: Buffer): Promise<string> {
+  const { getDocument } = await import("pdfjs-dist/legacy/build/pdf.mjs");
+  const task = getDocument({ data: new Uint8Array(buf), disableFontFace: true, verbosity: 0 });
+  const doc = await task.promise;
+  let out = "";
+  for (let p = 1; p <= doc.numPages; p++) {
+    const c = await (await doc.getPage(p)).getTextContent();
+    out += c.items.map((i) => ("str" in i ? i.str : "")).join("");
+  }
+  await task.destroy();
+  if (out.trim().length < 50) throw new Error("PDF text extraction returned almost nothing");
+  return out.replace(/\s+/g, "");
+}
+const squash = (s: string) => s.replace(/\s+/g, "");
 const pdfPageCount = (pdf: Buffer) => (pdf.toString("latin1").match(/\/Type \/Page\b/g) ?? []).length;
 
 async function main() {
@@ -159,7 +174,7 @@ async function main() {
   /* assets */
   const lab = MGPL_LAB;
   for (const s of [lab.logoSrc, lab.qcStampSrc!, lab.icons.emailSrc, lab.icons.phoneSrc, lab.signatory.signatureHeaderSrc, lab.signatory.signatureNonHeaderSrc])
-    if (!existsSync(join(root, "public", s))) warn(`missing asset public${s}`);
+    if (!existsSync(join(root, "assets", s))) warn(`missing asset public${s}`);
   for (const f of ["carlito-400.woff", "carlito-700.woff", "carlito-400-italic.woff", "carlito-700-italic.woff", "archivo-black-400.woff", "barlow-semi-condensed-300.woff", ...[400, 500, 600, 700, 800].map((w) => `manrope-${w}.woff`)])
     if (!existsSync(join(fontDir, f))) warn(`missing font ${f}`);
 
@@ -209,6 +224,8 @@ async function main() {
           const pdf = await renderReportPdf({ report, variant: v, design: d });
           if (pdf.subarray(0, 5).toString() !== "%PDF-") warn(`${tag}: not a PDF`);
           if (pdfPageCount(pdf) !== pages) warn(`${tag}: PDF has ${pdfPageCount(pdf)} pages, layout says ${pages}`);
+          const text = await pdfText(pdf);
+          for (const val of expectedValues(report)) if (!text.includes(squash(val))) warn(`${tag}: PDF is missing "${val}"`);
           ok++;
           console.log(`ok   ${tag.padEnd(46)} ${pages} page(s)  ${(pdf.length / 1024).toFixed(0)} KB`);
         } catch (e) {

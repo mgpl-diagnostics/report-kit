@@ -5,9 +5,9 @@
 import { cpSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
-import { LabReport, MGPL_LAB, SidebarLetterhead, type LabProfile, type ReportDesign, type ReportVariant } from "../src/report-kit";
-import { renderLetterheadPdf, renderReportPdf } from "../src/report-kit/pdf";
-import { getSampleReport, SAMPLES } from "../src/app/samples";
+import { LabReport, MGPL_LAB, SidebarLetterhead, type LabProfile, type ReportDesign, type ReportVariant } from "../src";
+import { renderLetterheadPdf, renderReportPdf } from "../src/pdf";
+import { getSampleReport, SAMPLES } from "../src/samples";
 
 const root = process.cwd();
 const out = join(root, "examples");
@@ -41,8 +41,8 @@ async function main() {
     mkdirSync(join(out, d, "pdf"), { recursive: true });
   }
   // Self-contained: copy images + fonts next to the HTML files
-  cpSync(join(root, "public", "report-assets"), join(out, "report-assets"), { recursive: true });
-  cpSync(join(root, "public", "report-fonts"), join(out, "report-fonts"), { recursive: true });
+  cpSync(join(root, "assets", "report-assets"), join(out, "report-assets"), { recursive: true });
+  cpSync(join(root, "assets", "report-fonts"), join(out, "report-fonts"), { recursive: true });
 
   // Letterhead stationery
   mkdirSync(join(out, "letterhead"), { recursive: true });

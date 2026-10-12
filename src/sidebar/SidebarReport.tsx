@@ -34,7 +34,7 @@ export function SidebarReport({ report, variant, lab = MGPL_LAB, includeStyles =
       {includeStyles && <style dangerouslySetInnerHTML={{ __html: sidebarCss(fontBase) }} />}
       {pages.map((page, n) => (
         <div key={n} className="sb-page">
-          {variant === "header" && <Letterhead lab={lab} />}
+          {variant === "header" && <SbLetterhead lab={lab} />}
           <PatientBlock report={report} />
           {bar && <Svg className="sb-barcode" svg={bar} />}
           <Svg className="sb-qr" svg={qr} />
@@ -74,7 +74,7 @@ export function SidebarLetterhead({ lab = MGPL_LAB, includeStyles = true, fontBa
     <div className="sb-doc">
       {includeStyles && <style dangerouslySetInnerHTML={{ __html: sidebarCss(fontBase) }} />}
       <div className="sb-page">
-        <Letterhead lab={lab} />
+        <SbLetterhead lab={lab} />
       </div>
     </div>
   );
@@ -82,7 +82,8 @@ export function SidebarLetterhead({ lab = MGPL_LAB, includeStyles = true, fontBa
 
 /* ---------------------------------------------------------------- letterhead */
 
-function Letterhead({ lab }: { lab: LabProfile }) {
+/** Letterhead layer (sidebar + header + footer), shared with the invoice kit. */
+export function SbLetterhead({ lab }: { lab: LabProfile }) {
   return (
     <>
       <div className="sb-side">

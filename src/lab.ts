@@ -28,4 +28,9 @@ export const MGPL_LAB: LabProfile = {
     "In front Of Police Station, Arang, Raipur, Chhattisgarh   |   +91-9340638661   |   maagaytripatholgylab2006@gmail.com",
   ],
   // verifyBaseUrl: "https://your-domain/verify/",  // set when an online verify page exists
+  // upiId: "yourname@bank",                          // set to print a "scan to pay" UPI QR on invoices
+  invoiceTerms: [
+    "Reports are released only after full payment.",
+    "Please bring this invoice when collecting reports.",
+  ],
 };

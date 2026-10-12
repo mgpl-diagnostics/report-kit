@@ -22,6 +22,9 @@ export interface Patient {
   sampleCollectionDate?: Date | string;
   /** Lab sample / accession number */
   sampleId?: string;
+  /** Used on invoices */
+  phone?: string;
+  address?: string;
   /** e.g. "Whole Blood (EDTA)". Defaults to the specimens of the tests on the report. */
   sampleType?: string;
   /** Date or preformatted "12-10-2026 08:45 AM". Falls back to sampleCollectionDate. */
@@ -200,6 +203,15 @@ export interface LabProfile {
   /** If set, the QR code links to `${verifyBaseUrl}${sampleId ?? patientId}`; otherwise it
    *  encodes a plain-text summary of the report. */
   verifyBaseUrl?: string;
+  /* ---- billing (invoice kit) ---- */
+  /** UPI ID (VPA) for the "scan to pay" QR on invoices, e.g. "mgpl@okaxis" */
+  upiId?: string;
+  /** Printed on invoices when the lab is GST registered */
+  gstin?: string;
+  /** Clinical establishment / lab registration number */
+  registrationNo?: string;
+  /** Terms printed at the bottom of invoices */
+  invoiceTerms?: string[];
 }
 
 export interface Report {

@@ -1,4 +1,5 @@
-import { buildReport, PROFILES, TEMPLATES, type Patient, type ProfileId, type Report, type TemplateId, type TestInput } from "@/report-kit";
+import { buildReport, PROFILES, TEMPLATES, type ProfileId, type TemplateId, type TestInput } from "./templates";
+import type { Patient, Report } from "./types";
 
 /** Demo reports — results copied from the original Word designs in /Design; patient names are fictional. */
 export interface Sample {

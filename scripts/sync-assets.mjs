@@ -1,7 +1,7 @@
-// Copies third-party assets from node_modules into /public so the HTML preview
-// and the Node PDF renderer use exactly the same files.
-//   - fonts  : @fontsource/*      -> public/report-fonts/
-//   - icons  : @tabler/icons (MIT) -> public/report-assets/
+// Copies third-party assets from node_modules into ./assets (shipped with the package) so the
+// HTML preview and the Node PDF renderer use exactly the same files.
+//   - fonts  : @fontsource/*      -> assets/report-fonts/
+//   - icons  : @tabler/icons (MIT) -> assets/report-assets/
 //   - qc-stamp.svg : circular "QUALITY CONTROL / APPROVED" stamp. Letters are converted to
 //                    vector paths with opentype.js, so it renders identically everywhere.
 // Run: npm run assets
@@ -13,7 +13,7 @@ import { fileURLToPath } from "node:url";
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const nm = (...p) => join(root, "node_modules", ...p);
 
-const fontsDir = join(root, "public", "report-fonts");
+const fontsDir = join(root, "assets", "report-fonts");
 mkdirSync(fontsDir, { recursive: true });
 const fonts = [
   ["carlito", "carlito-latin-400-normal.woff", "carlito-400.woff"],
@@ -35,7 +35,7 @@ for (const [pkg, file, out] of fonts) {
 }
 
 // Tabler icons. `color` replaces currentColor (an <img> SVG cannot inherit CSS colour).
-const assetsDir = join(root, "public", "report-assets");
+const assetsDir = join(root, "assets", "report-assets");
 const icons = [
   ["outline/mail-forward.svg", "icon-email.svg", "#000000"],
   ["outline/phone-call.svg", "icon-phone.svg", "#000000"],

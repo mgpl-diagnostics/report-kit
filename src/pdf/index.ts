@@ -8,12 +8,14 @@ import { MGPL_LAB } from "../lab";
 import { qrSvg, reportQrValue } from "../qr";
 import { SidebarLetterheadPdf, SidebarReportPdf } from "../sidebar/SidebarReportPdf";
 import type { LabProfile, Report, ReportDesign, ReportVariant } from "../types";
+import { assetsDir } from "../paths";
 import { loadImage, registerFonts, svgToPng } from "./assets";
 import { ReportPdf } from "./ReportPdf";
 
 export { ReportPdf } from "./ReportPdf";
-export { SidebarLetterheadPdf, SidebarReportPdf } from "../sidebar/SidebarReportPdf";
+export { SbLetterheadPdf, SidebarLetterheadPdf, SidebarReportPdf, type SbPdfImages } from "../sidebar/SidebarReportPdf";
 export { loadImage, registerFonts, svgToPng } from "./assets";
+export { assetsDir, packageRoot } from "../paths";
 
 export interface RenderPdfOptions {
   report: Report;
@@ -21,7 +23,7 @@ export interface RenderPdfOptions {
   /** "sidebar" (Navy Sidebar, default) or "classic" (replica of the Word designs) */
   design?: ReportDesign;
   lab?: LabProfile;
-  /** Folder that "/report-assets/…" image paths resolve against. Default: <cwd>/public */
+  /** Folder that "/report-assets/…" image paths resolve against. Default: this package's assets/ */
   publicDir?: string;
   /** Folder with the report .woff fonts. Default: <publicDir>/report-fonts */
   fontDir?: string;
@@ -31,7 +33,7 @@ const render = (el: ReactElement) => renderToBuffer(el as Parameters<typeof rend
 
 function setup(opts: { lab?: LabProfile; publicDir?: string; fontDir?: string }) {
   const lab = opts.lab ?? MGPL_LAB;
-  const publicDir = opts.publicDir ?? join(process.cwd(), "public");
+  const publicDir = opts.publicDir ?? assetsDir();
   registerFonts(opts.fontDir ?? join(publicDir, "report-fonts"));
   return { lab, publicDir };
 }
