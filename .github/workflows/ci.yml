@@ -32,3 +32,5 @@ jobs:
       - run: npm run build
       - name: Smoke test (HTML + PDF renders, fit, glyphs, PDF text)
         run: npm run smoke
+      - name: llms-full.txt is up to date (run `npm run llms` and commit if this fails)
+        run: npm run llms && git diff --exit-code -- llms-full.txt

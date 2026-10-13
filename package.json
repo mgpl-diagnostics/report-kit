@@ -41,7 +41,7 @@
     "smoke": "tsx scripts/smoke-test.tsx",
     "examples": "tsx scripts/generate-examples.tsx",
     "prepare": "tsup",
-    "llms": "node scripts/llms-full.mjs \"@mgpl-diagnostics/report-kit\" README.md docs/api.md AGENTS.md src/shared/types.ts src/shared/api.ts src/server/api.ts src/server/signatures.ts"
+    "llms": "node scripts/llms-full.mjs @mgpl-diagnostics/report-kit README.md AGENTS.md THIRD_PARTY_NOTICES.md llms.txt docs package.json src scripts"
   },
   "dependencies": {
     "@react-pdf/renderer": "^4.9.0",
