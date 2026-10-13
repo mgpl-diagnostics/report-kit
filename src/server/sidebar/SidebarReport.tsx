@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { barcodeSvg } from "../barcode";
 import { MGPL_LAB } from "../lab";
 import { qrSvg, reportQrValue } from "../qr";
-import type { Align, LabProfile, Report, ReportVariant, Rich, Row, Section, TestRow } from "../types";
+import type { Align, LabProfile, Report, ReportVariant, Rich, Row, Section, TestRow } from "../../shared/types";
 import { SB_CELL_PAD, SB_COLS } from "./layout";
 import { isGrid, sbLayoutPages, sbRowHeight, showsTableHeader, subtitleOf, type SbPart } from "./measure";
 import { flagOf, gridColumns, isTwoColumn, LEGAL, LEGEND, patientFields, sectionMeta, STD_COLUMNS, TWO_COL_RESULT_W } from "./model";

@@ -5,9 +5,9 @@
 import { cpSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
-import { LabReport, MGPL_LAB, SidebarLetterhead, type LabProfile, type ReportDesign, type ReportVariant } from "../src";
-import { renderLetterheadPdf, renderReportPdf } from "../src/pdf";
-import { getSampleReport, SAMPLES } from "../src/samples";
+import { LabReport, MGPL_LAB, SidebarLetterhead, type LabProfile, type ReportDesign, type ReportVariant } from "../src/server";
+import { renderLetterheadPdf, renderReportPdf } from "../src/server";
+import { getSampleReport, SAMPLES } from "../src/server";
 
 const root = process.cwd();
 const out = join(root, "examples");

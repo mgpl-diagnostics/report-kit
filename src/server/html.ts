@@ -4,11 +4,11 @@
 import { readFileSync } from "node:fs";
 import { extname, join } from "node:path";
 import { createElement } from "react";
-import { MGPL_LAB } from "./lab";
+import { defaultLab } from "./signatures";
 import { LabReport } from "./LabReport";
 import { assetsDir } from "./paths";
 import { SidebarLetterhead } from "./sidebar/SidebarReport";
-import type { LabProfile, Report, ReportDesign, ReportVariant } from "./types";
+import type { LabProfile, Report, ReportDesign, ReportVariant } from "../shared/types";
 
 export { assetsDir, packageRoot } from "./paths";
 
@@ -20,7 +20,7 @@ function dataUri(file: string): string {
 }
 
 /** Lab profile with every "/report-assets/…" path replaced by a data URI from the package assets. */
-export function inlineLab(lab: LabProfile = MGPL_LAB, dir = assetsDir()): LabProfile {
+export function inlineLab(lab: LabProfile = defaultLab(), dir = assetsDir()): LabProfile {
   const conv = (src: string) => (src.startsWith("/") ? dataUri(join(dir, src)) : src);
   return {
     ...lab,
@@ -59,7 +59,7 @@ const wrap = (title: string, body: string) =>
 export async function renderReportHtml(opts: RenderHtmlOptions): Promise<string> {
   const { renderToStaticMarkup } = await import("react-dom/server");
   const inline = opts.inline !== false;
-  const lab = inline ? inlineLab(opts.lab) : opts.lab ?? MGPL_LAB;
+  const lab = inline ? inlineLab(opts.lab) : opts.lab ?? defaultLab();
   const body = renderToStaticMarkup(
     createElement(LabReport, { report: opts.report, variant: opts.variant, design: opts.design, lab, fontBase: inline ? FONT_BASE : opts.fontBase }),
   );
@@ -71,7 +71,7 @@ export async function renderReportHtml(opts: RenderHtmlOptions): Promise<string>
 export async function renderLetterheadHtml(opts: { lab?: LabProfile; inline?: boolean; fontBase?: string } = {}): Promise<string> {
   const { renderToStaticMarkup } = await import("react-dom/server");
   const inline = opts.inline !== false;
-  const lab = inline ? inlineLab(opts.lab) : opts.lab ?? MGPL_LAB;
+  const lab = inline ? inlineLab(opts.lab) : opts.lab ?? defaultLab();
   const body = renderToStaticMarkup(createElement(SidebarLetterhead, { lab, fontBase: inline ? FONT_BASE : opts.fontBase }));
   const html = wrap(`${lab.name} - Letterhead`, body);
   return inline ? inlineFonts(html) : html;

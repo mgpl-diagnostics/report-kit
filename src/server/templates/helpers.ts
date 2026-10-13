@@ -1,4 +1,4 @@
-import type { Column, Flag, Patient, Rich, Row, Section, SectionStyle, TestRow } from "../types";
+import type { Column, Flag, Patient, Rich, Row, Section, SectionStyle, TestRow } from "../../shared/types";
 
 /** What an app passes for one test line. A plain string is just the result. */
 export type ResultValue =

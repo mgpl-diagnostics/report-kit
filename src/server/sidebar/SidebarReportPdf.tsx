@@ -1,7 +1,7 @@
 import { Document, Image, Page, Text, View } from "@react-pdf/renderer";
 import type { ReactNode } from "react";
 import type { PdfImage } from "../pdf/assets";
-import type { Align, LabProfile, Report, ReportVariant, Rich, Row, Section, TestRow } from "../types";
+import type { Align, LabProfile, Report, ReportVariant, Rich, Row, Section, TestRow } from "../../shared/types";
 import {
   SB_BODY,
   SB_CELL_PAD,

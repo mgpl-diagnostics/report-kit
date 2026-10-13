@@ -14,7 +14,7 @@ import {
   TITLE_BAR as TB,
 } from "../layout";
 import { LINE, headerCells, layoutPages, rowBox, sectionHead } from "../measure";
-import type { Align, Column, LabProfile, Report, ReportVariant, Rich, Row, Section, TestRow } from "../types";
+import type { Align, Column, LabProfile, Report, ReportVariant, Rich, Row, Section, TestRow } from "../../shared/types";
 import type { PdfImage } from "./assets";
 
 /** Lab images already loaded as buffers (see renderReportPdf). */

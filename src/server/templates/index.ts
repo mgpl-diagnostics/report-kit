@@ -1,4 +1,4 @@
-import type { Patient, Report } from "../types";
+import type { Patient, Report } from "../../shared/types";
 import { biochemistry, bloodSugar, electrolytes, hba1c, ironProfile, kft, lft, lipid, rft } from "./biochemistry";
 import { semen, stool, upt, urine } from "./clinicalPathology";
 import { bloodGroup, btCt, cbc, esr, hb, mp, ptInr } from "./hematology";

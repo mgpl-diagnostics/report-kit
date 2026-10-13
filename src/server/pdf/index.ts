@@ -4,10 +4,10 @@ import { join } from "node:path";
 import { renderToBuffer } from "@react-pdf/renderer";
 import { createElement, type ReactElement } from "react";
 import { barcodeSvg } from "../barcode";
-import { MGPL_LAB } from "../lab";
+import { defaultLab } from "../signatures";
 import { qrSvg, reportQrValue } from "../qr";
 import { SidebarLetterheadPdf, SidebarReportPdf } from "../sidebar/SidebarReportPdf";
-import type { LabProfile, Report, ReportDesign, ReportVariant } from "../types";
+import type { LabProfile, Report, ReportDesign, ReportVariant } from "../../shared/types";
 import { assetsDir } from "../paths";
 import { loadImage, registerFonts, svgToPng } from "./assets";
 import { ReportPdf } from "./ReportPdf";
@@ -32,7 +32,7 @@ export interface RenderPdfOptions {
 const render = (el: ReactElement) => renderToBuffer(el as Parameters<typeof renderToBuffer>[0]);
 
 function setup(opts: { lab?: LabProfile; publicDir?: string; fontDir?: string }) {
-  const lab = opts.lab ?? MGPL_LAB;
+  const lab = opts.lab ?? defaultLab();
   const publicDir = opts.publicDir ?? assetsDir();
   registerFonts(opts.fontDir ?? join(publicDir, "report-fonts"));
   return { lab, publicDir };

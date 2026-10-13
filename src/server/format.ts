@@ -1,4 +1,4 @@
-import type { Flag, Patient, Section, TestRow } from "./types";
+import type { Flag, Patient, Section, TestRow } from "../shared/types";
 
 const pad = (n: number) => String(n).padStart(2, "0");
 

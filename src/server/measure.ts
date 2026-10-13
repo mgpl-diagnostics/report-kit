@@ -5,7 +5,7 @@
  * All values are in pt (1in = 72pt).
  */
 import { BODY_TOP, END, PATIENT, SECTION, TITLE_BAR } from "./layout";
-import type { Column, Report, Rich, Row, Section } from "./types";
+import type { Column, Report, Rich, Row, Section } from "../shared/types";
 
 export const LINE = 1.22; // Calibri / Carlito single line spacing
 const IN = 72;

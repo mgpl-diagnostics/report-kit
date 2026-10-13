@@ -1,4 +1,4 @@
-import type { Row } from "../types";
+import type { Row } from "../../shared/types";
 import { COLS_LIPID, COLS_STD, fieldsOf, fillRows, h, panel, t, type ReportTemplate } from "./helpers";
 
 const TITLE = "CLINICAL BIOCHEMISTRY";
@@ -15,6 +15,7 @@ const sugarRows: Row[] = [
 export const bloodSugar: ReportTemplate = {
   id: "blood-sugar",
   name: "Blood Sugar (F / PP / Random)",
+  category: "Biochemistry",
   specimen: "Fluoride Plasma",
   fields: fieldsOf(sugarRows),
   build: (r) => [{ title: TITLE, columns: COLS_STD, rows: fillRows(sugarRows, r, true), style: { rowGap: 10 } }],
@@ -41,6 +42,7 @@ const lftRows: Row[] = [
 export const lft: ReportTemplate = {
   id: "lft",
   name: "Liver Function Test (LFT)",
+  category: "Biochemistry",
   specimen: "Serum",
   fields: fieldsOf(lftRows),
   build: (r) => [
@@ -73,6 +75,7 @@ const lipidRows: Row[] = [
 export const lipid: ReportTemplate = {
   id: "lipid",
   name: "Lipid Profile",
+  category: "Biochemistry",
   specimen: "Serum",
   fields: fieldsOf(lipidRows),
   build: (r) => [

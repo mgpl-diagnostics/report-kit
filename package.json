@@ -1,9 +1,9 @@
 {
   "name": "@mgpl-diagnostics/report-kit",
-  "version": "1.0.0",
-  "description": "MGPL Diagnostics lab reports: React (HTML) + pure Node.js A4 PDF, header / non-header, Navy Sidebar & classic designs.",
+  "version": "2.0.0",
+  "description": "MGPL Diagnostics lab reports — BACKEND kit (Node.js): templates, React document rendering, pure Node A4 PDF, and an HTTP API for Next.js, Fastify, Express or any backend. Frontends use @mgpl-diagnostics/client.",
   "type": "module",
-  "license": "UNLICENSED",
+  "license": "SEE LICENSE IN LICENSE",
   "repository": "github:mgpl-diagnostics/report-kit",
   "sideEffects": false,
   "main": "./dist/index.js",
@@ -13,13 +13,9 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
-    "./pdf": {
-      "types": "./dist/pdf/index.d.ts",
-      "import": "./dist/pdf/index.js"
-    },
-    "./server": {
-      "types": "./dist/server.d.ts",
-      "import": "./dist/server.js"
+    "./fastify": {
+      "types": "./dist/fastify.d.ts",
+      "import": "./dist/fastify.js"
     },
     "./assets/*": "./assets/*",
     "./package.json": "./package.json"
@@ -34,14 +30,18 @@
     "docs",
     "README.md",
     "AGENTS.md",
-    "llms.txt"
+    "llms.txt",
+    "LICENSE",
+    "llms-full.txt"
   ],
   "scripts": {
     "build": "tsup",
     "typecheck": "tsc --noEmit",
     "assets": "node scripts/sync-assets.mjs",
     "smoke": "tsx scripts/smoke-test.tsx",
-    "examples": "tsx scripts/generate-examples.tsx"
+    "examples": "tsx scripts/generate-examples.tsx",
+    "prepare": "tsup",
+    "llms": "node scripts/llms-full.mjs \"@mgpl-diagnostics/report-kit\" README.md docs/api.md AGENTS.md src/shared/types.ts src/shared/api.ts src/server/api.ts src/server/signatures.ts"
   },
   "dependencies": {
     "@react-pdf/renderer": "^4.9.0",
@@ -51,7 +51,8 @@
   },
   "peerDependencies": {
     "react": ">=18",
-    "react-dom": ">=18"
+    "react-dom": ">=18",
+    "fastify": ">=4"
   },
   "engines": {
     "node": ">=20"
@@ -67,6 +68,7 @@
     "@types/qrcode": "^1.5.6",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "fastify": "^5.12.5",
     "fontkit": "^2.0.4",
     "opentype.js": "^2.0.0",
     "pdfjs-dist": "^6.4.299",
@@ -78,5 +80,10 @@
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
+  },
+  "peerDependenciesMeta": {
+    "fastify": {
+      "optional": true
+    }
   }
 }

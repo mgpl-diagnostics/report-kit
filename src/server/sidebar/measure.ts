@@ -1,4 +1,4 @@
-import type { Report, Row, Section } from "../types";
+import type { Report, Row, Section } from "../../shared/types";
 import { SB_BODY, SB_ROWS as R } from "./layout";
 
 /** A slice of a section placed on one page. */

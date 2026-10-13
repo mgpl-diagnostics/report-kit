@@ -1,4 +1,4 @@
-import type { LabProfile } from "./types";
+import type { LabProfile } from "../shared/types";
 
 /**
  * Lab details + every image used on the report.
@@ -14,8 +14,10 @@ export const MGPL_LAB: LabProfile = {
   signatory: {
     name: "Dr.Gulab Singh (B.Sc., D.M.L.T.)",
     designation: "Lab Tech. / Pathologist",
-    signatureHeaderSrc: "/report-assets/signature-scan.jpg",
-    signatureNonHeaderSrc: "/report-assets/signature-green.png",
+    // Placeholder in the public package — the real signature is loaded from a private file on the
+    // server via MGPL_SIGNATURE_FILE / MGPL_SIGNATURE_HEADER_FILE / MGPL_SIGNATURE_NONHEADER_FILE.
+    signatureHeaderSrc: "/report-assets/signature-placeholder.svg",
+    signatureNonHeaderSrc: "/report-assets/signature-placeholder.svg",
   },
   qcStampSrc: "/report-assets/qc-stamp.svg",
   icons: {

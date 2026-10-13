@@ -1,4 +1,4 @@
-import type { Row } from "../types";
+import type { Row } from "../../shared/types";
 import { COLS_CBC, COLS_STD, COLS_TWO, fieldsOf, fillRows, h, panel, t, type ReportTemplate } from "./helpers";
 
 /* ----------------------------------------------------------------------- CBC */
@@ -31,6 +31,7 @@ const cbcRows: Row[] = [
 export const cbc: ReportTemplate = {
   id: "cbc",
   name: "Complete Blood Count (CBC)",
+  category: "Hematology",
   specimen: "Whole Blood (EDTA)",
   method: "Automated Cell Counter",
   fields: fieldsOf(cbcRows),
@@ -65,6 +66,7 @@ const hbRows: Row[] = [t("hb", "Haemoglobin", "gram/dl", "12 - 15", { rangeBySex
 export const hb: ReportTemplate = {
   id: "hb",
   name: "Haemoglobin (HB)",
+  category: "Hematology",
   specimen: "Whole Blood (EDTA)",
   fields: fieldsOf(hbRows),
   build: (r, ctx) => [
@@ -80,6 +82,7 @@ const bloodGroupRows: Row[] = [t("bloodGroup", "Blood Group")];
 export const bloodGroup: ReportTemplate = {
   id: "blood-group",
   name: "Blood Group",
+  category: "Hematology",
   specimen: "Whole Blood (EDTA)",
   fields: fieldsOf(bloodGroupRows),
   build: (r) => [
@@ -95,6 +98,7 @@ const mpRows: Row[] = [t("mp", "Mp By Card")];
 export const mp: ReportTemplate = {
   id: "mp",
   name: "Malaria Parasite (MP) by Card",
+  category: "Hematology",
   specimen: "Whole Blood (EDTA)",
   method: "Rapid Card Test",
   fields: fieldsOf(mpRows),

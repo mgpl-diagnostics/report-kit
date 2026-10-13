@@ -1,5 +1,5 @@
 import { buildReport, PROFILES, TEMPLATES, type ProfileId, type TemplateId, type TestInput } from "./templates";
-import type { Patient, Report } from "./types";
+import type { Patient, Report } from "../shared/types";
 
 /** Demo reports — results copied from the original Word designs in /Design; patient names are fictional. */
 export interface Sample {

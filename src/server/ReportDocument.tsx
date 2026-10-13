@@ -5,7 +5,7 @@ import { MGPL_LAB } from "./lab";
 import { NON_HEADER, SECTION } from "./layout";
 import { headerCells, layoutPages, rowBox, sectionHead } from "./measure";
 import { reportCss } from "./styles";
-import type { Align, Column, LabProfile, Report, ReportVariant, Rich, Row, Section, TestRow } from "./types";
+import type { Align, Column, LabProfile, Report, ReportVariant, Rich, Row, Section, TestRow } from "../shared/types";
 
 export interface ReportDocumentProps {
   report: Report;

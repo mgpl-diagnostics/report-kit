@@ -1,6 +1,6 @@
 import QRCode from "qrcode";
 import { fullName, formatDate } from "./format";
-import type { LabProfile, Report } from "./types";
+import type { LabProfile, Report } from "../shared/types";
 
 /** QR code as an SVG string (encoded by the `qrcode` library; synchronous, works in browser and Node). */
 export function qrSvg(text: string, color = "#000"): string {

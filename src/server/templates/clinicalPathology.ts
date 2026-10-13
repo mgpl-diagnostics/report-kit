@@ -1,4 +1,4 @@
-import type { Rich, Row, SectionStyle } from "../types";
+import type { Rich, Row, SectionStyle } from "../../shared/types";
 import { COLS_ROUTINE, COLS_SEMEN, COLS_TWO, fieldsOf, fillRows, h, t, type ReportTemplate, type Results, type ResultValue } from "./helpers";
 
 const routineStyle: SectionStyle = { rowGap: 0, headingSize: 12, abnormalBold: false };
@@ -28,6 +28,7 @@ const urineRows: Row[] = [
 export const urine: ReportTemplate = {
   id: "urine",
   name: "Urine Routine & Microscopic (URM)",
+  category: "Clinical Pathology",
   specimen: "Urine",
   fields: fieldsOf(urineRows),
   build: (r) => [{ title: "URINE ROUTINE & MICROSCOPIC", columns: COLS_ROUTINE, rows: fillRows(urineRows, r), style: routineStyle }],
@@ -45,6 +46,7 @@ const uptRows: Row[] = [t("upt", "Urine Pregnancy Test")];
 export const upt: ReportTemplate = {
   id: "upt",
   name: "Urine Pregnancy Test (UPT)",
+  category: "Clinical Pathology",
   specimen: "Urine",
   method: "Rapid Card Test",
   fields: fieldsOf(uptRows),
@@ -85,6 +87,7 @@ const stoolRows: Row[] = [
 export const stool: ReportTemplate = {
   id: "stool",
   name: "Stool Routine & Microscopic",
+  category: "Clinical Pathology",
   specimen: "Stool",
   fields: fieldsOf(stoolRows),
   build: (r) => [{ title: "STOOL ROUTINE & MICROSCOPIC", columns: COLS_ROUTINE, rows: fillRows(stoolRows, r), style: routineStyle }],
@@ -124,6 +127,7 @@ const red = (v: ResultValue | undefined): Rich => {
 export const semen: ReportTemplate<SemenResults> = {
   id: "semen",
   name: "Semen Analysis",
+  category: "Clinical Pathology",
   specimen: "Semen",
   fields: [
     { key: "volume", label: "Volume" },

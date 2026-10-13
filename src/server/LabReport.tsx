@@ -1,6 +1,6 @@
 import { ReportDocument } from "./ReportDocument";
 import { SidebarReport } from "./sidebar/SidebarReport";
-import type { LabProfile, Report, ReportDesign, ReportVariant } from "./types";
+import type { LabProfile, Report, ReportDesign, ReportVariant } from "../shared/types";
 
 export interface LabReportProps {
   report: Report;

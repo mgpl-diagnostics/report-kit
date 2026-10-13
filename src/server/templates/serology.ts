@@ -1,4 +1,4 @@
-import type { Row, SectionStyle } from "../types";
+import type { Row, SectionStyle } from "../../shared/types";
 import { COLS_RA, COLS_SEROLOGY, COLS_STD, COLS_WIDAL, fieldsOf, fillRows, h, panel, t, titre, type ReportTemplate, type Results } from "./helpers";
 
 const RAPID = "(Performed on Jmitra Rapid test.)";
@@ -29,6 +29,7 @@ const dengueRows: Row[] = [
 export const dengue: ReportTemplate = {
   id: "dengue",
   name: "Dengue (IgG / IgM / NS1)",
+  category: "Serology",
   specimen: "Serum",
   method: "Rapid Card Test",
   fields: fieldsOf(dengueRows),
@@ -51,6 +52,7 @@ const viralRows: Row[] = [
 export const hivHbsagVdrl: ReportTemplate = {
   id: "hiv-hbsag-vdrl",
   name: "HIV / HBsAg / VDRL",
+  category: "Serology",
   specimen: "Serum",
   fields: fieldsOf(viralRows),
   build: (r) => [
@@ -87,6 +89,7 @@ const antigens: [keyof WidalResults, string, string][] = [
 export const widal: ReportTemplate<WidalResults> = {
   id: "widal",
   name: "Widal Test",
+  category: "Serology",
   specimen: "Serum",
   fields: [
     ...antigens.map(([key, a, b]) => ({ key: key as string, label: `${a} ${b} (1:40 … 1:640)` })),
@@ -134,6 +137,7 @@ const raRows: Row[] = [t("ra", "RA Factor", undefined, "Negative")];
 export const raFactor: ReportTemplate = {
   id: "ra-factor",
   name: "RA Factor",
+  category: "Serology",
   specimen: "Serum",
   fields: fieldsOf(raRows),
   build: (r) => [

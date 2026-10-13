@@ -5,13 +5,29 @@
 //   - qc-stamp.svg : circular "QUALITY CONTROL / APPROVED" stamp. Letters are converted to
 //                    vector paths with opentype.js, so it renders identically everywhere.
 // Run: npm run assets
-import { copyFileSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import opentype from "opentype.js";
+import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const nm = (...p) => join(root, "node_modules", ...p);
+// resolve packages the way Node does (works standalone and inside an npm workspace)
+const require = createRequire(import.meta.url);
+const nm = (...p) => {
+  const pkg = p[0].startsWith("@") ? `${p[0]}/${p[1]}` : p[0];
+  const rest = p.slice(p[0].startsWith("@") ? 2 : 1);
+  try {
+    return join(dirname(require.resolve(`${pkg}/package.json`)), ...rest);
+  } catch {
+    // packages whose "exports" hide package.json: look in node_modules folders upward
+    for (let dir = root; ; dir = dirname(dir)) {
+      const cand = join(dir, "node_modules", pkg);
+      if (existsSync(cand)) return join(cand, ...rest);
+      if (dirname(dir) === dir) throw new Error(`Cannot find ${pkg}`);
+    }
+  }
+};
 
 const fontsDir = join(root, "assets", "report-fonts");
 mkdirSync(fontsDir, { recursive: true });
@@ -34,6 +50,14 @@ for (const [pkg, file, out] of fonts) {
   console.log(`font  ${out}`);
 }
 
+// Licence texts travel with the files (the OFL requires it for the fonts)
+const licDir = join(fontsDir, "LICENSES");
+mkdirSync(licDir, { recursive: true });
+for (const pkg of [...new Set(fonts.map((f) => f[0]))]) {
+  copyFileSync(nm("@fontsource", pkg, "LICENSE"), join(licDir, `${pkg}-OFL-1.1.txt`));
+  console.log(`lic   ${pkg}-OFL-1.1.txt`);
+}
+
 // Tabler icons. `color` replaces currentColor (an <img> SVG cannot inherit CSS colour).
 const assetsDir = join(root, "assets", "report-assets");
 const icons = [
@@ -50,6 +74,7 @@ for (const [src, out, color] of icons) {
   writeFileSync(join(assetsDir, out), svg);
   console.log(`icon  ${out}  (tabler ${src})`);
 }
+copyFileSync(nm("@tabler", "icons", "LICENSE"), join(assetsDir, "LICENSE-tabler-icons-MIT.txt"));
 
 // ---------------------------------------------------------------- QC stamp
 const GREEN = "#1E9B3C";

@@ -1,7 +1,7 @@
 // Display logic shared by the HTML and PDF renderers of the Navy Sidebar design.
 import { formatDate, formatDateTime, formatDoctor, fullName, resolveFlag } from "../format";
 import { headerCells } from "../measure";
-import type { Align, Report, Section, TestRow } from "../types";
+import type { Align, Report, Section, TestRow } from "../../shared/types";
 import { SB_COLORS, SB_COLS, SB_CONTENT } from "./layout";
 
 export interface Field {

@@ -25,11 +25,11 @@ import {
   type ReportVariant,
   type Rich,
   type Row,
-} from "../src";
-import { renderLetterheadPdf, renderReportPdf } from "../src/pdf";
-import { gridColumns, isTwoColumn, LEGAL, LEGEND, patientFields, sectionMeta, TWO_COL_RESULT_W } from "../src/sidebar/model";
-import { displayRows, subtitleOf } from "../src/sidebar/measure";
-import { getSampleReport, SAMPLES } from "../src/samples";
+} from "../src/server";
+import { renderLetterheadPdf, renderReportPdf } from "../src/server";
+import { gridColumns, isTwoColumn, LEGAL, LEGEND, patientFields, sectionMeta, TWO_COL_RESULT_W } from "../src/server/sidebar/model";
+import { displayRows, subtitleOf } from "../src/server/sidebar/measure";
+import { getSampleReport, SAMPLES } from "../src/server";
 
 const root = process.cwd();
 const fontDir = join(root, "assets", "report-fonts");
