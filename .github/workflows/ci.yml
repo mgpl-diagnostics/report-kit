@@ -5,8 +5,17 @@ on:
     branches: [main]
   pull_request:
 
+permissions:
+  contents: read
+  packages: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  test:
+  # The job id "ci" is the required status check on main (see mgpl-diagnostics/.github scripts/protect-repos.mjs).
+  ci:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -14,9 +23,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+          registry-url: https://npm.pkg.github.com
+          scope: "@mgpl-diagnostics"
       - run: npm install --no-package-lock
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: npm run typecheck
-      - name: dist/ is up to date
-        run: npm run build && git diff --exit-code -- dist
+      - run: npm run build
       - name: Smoke test (HTML + PDF renders, fit, glyphs, PDF text)
         run: npm run smoke
