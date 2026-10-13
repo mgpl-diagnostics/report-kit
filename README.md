@@ -1,175 +1,239 @@
-# @mgpl-diagnostics/report-kit
+<div align="center">
 
-A4 pathology lab reports for **MGPL Diagnostics (Maa Gayatri Path Lab)**:
-- React components for the HTML preview;
-- a **pure Node.js PDF** export (no browser, no Word);
-- self-contained HTML strings for backends.
+<img src="assets/report-assets/logo.svg" alt="MGPL Diagnostics" width="300" />
 
-| | |
-|---|---|
-| **Designs** | `sidebar` (Navy Sidebar, default) and `classic` (replica of the original Word reports) |
-| **Variants** | `header` prints the letterhead. `non-header` leaves it blank, for paper with the letterhead pre-printed. |
-| **Templates** | 31 tests (CBC, LFT, KFT, lipid, thyroid, HbA1c, Widal, dengue, urine …) + 7 profiles |
-| **Extras** | auto H/L flags, sex-specific ranges, multi-page with *Page X of Y*, Code 39 barcode, QR code |
-| **Runs in** | Next.js (server or client components), any React app, plain Node.js backends |
+# report-kit
 
-Patient invoices live in the sister package [`@mgpl-diagnostics/invoice-kit`](https://github.com/mgpl-diagnostics/invoice-kit).
+**The backend that turns lab results into print-ready A4 reports, as PDF or HTML.**
+
+Navy Sidebar and classic designs · header and pre-printed paper variants · 31 tests · scannable barcode and QR · no browser needed
+
+[![Backend](https://img.shields.io/badge/side-backend-14264A)](#)
+[![Node](https://img.shields.io/badge/node-%E2%89%A520-14264A?logo=node.js&logoColor=white)](#)
+[![TypeScript](https://img.shields.io/badge/TypeScript-strict-14264A?logo=typescript&logoColor=white)](#)
+[![Next.js · Fastify · Express](https://img.shields.io/badge/runs%20in-Next.js%20·%20Fastify%20·%20Express%20·%20Hono-C2410C)](#mount-it-anywhere)
+[![License](https://img.shields.io/badge/license-All%20rights%20reserved-E9A23B)](LICENSE)
+
+[Quick start](#quick-start) · [API](#http-api) · [Templates](#tests-and-profiles) · [Configuration](#configuration) · [Printing](#printing) · [Docs](docs/api.md)
+
+</div>
 
 ---
 
-## Install
+<table>
+<tr>
+<td width="33%"><img src="docs/images/navy-sidebar-header.png" alt="Navy Sidebar — header variant" /></td>
+<td width="33%"><img src="docs/images/navy-sidebar-non-header.png" alt="Navy Sidebar — non-header variant for pre-printed paper" /></td>
+<td width="33%"><img src="docs/images/letterhead.png" alt="Blank letterhead stationery" /></td>
+</tr>
+<tr>
+<td align="center"><b>Header</b><br/><sub>full letterhead, plain paper</sub></td>
+<td align="center"><b>Non-header</b><br/><sub>same layout, for pre-printed paper</sub></td>
+<td align="center"><b>Letterhead</b><br/><sub>print once, borderless</sub></td>
+</tr>
+</table>
 
-The package is private to the `mgpl-diagnostics` GitHub org. There are two ways to install it.
+## Why
 
-**A. From GitHub Packages** (recommended for apps):
+The lab used to produce reports by hand-editing Word files, one copy per test. `report-kit` replaces that with
+data → document:
 
-```ini
-# .npmrc in your project
-@mgpl-diagnostics:registry=https://npm.pkg.github.com
-//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}   # a token with read:packages
+- **Data in, A4 out.** You send a patient and their results; the backend returns a PDF or HTML page.
+- **Accurate by construction.** H/L flags come from the reference range, male/female ranges are picked
+  automatically, and long reports split across pages with *Page X of Y*.
+- **Prints the same everywhere.** HTML and PDF share one geometry file and one row-height model, so they
+  break pages in exactly the same places.
+- **Backend only.** Rendering, fonts, images and PDF generation run in Node.js. Your frontend stays
+  free to look however you want; it talks to this backend through [`@mgpl-diagnostics/client`](https://github.com/mgpl-diagnostics/client).
+
+## How it fits
+
+```mermaid
+flowchart LR
+  subgraph Frontend["Your app (any UI)"]
+    C["@mgpl-diagnostics/client<br/>headless SDK"]
+  end
+  subgraph Backend["Your backend (Node.js)"]
+    A["createReportApi()<br/>or createMgplApi()"] --> R["report-kit<br/>templates · layout · react-pdf"]
+    A --> I["invoice-kit<br/>billing"]
+  end
+  C -- "POST /report → PDF / HTML" --> A
+  C -- "GET /templates" --> A
 ```
+
+## Quick start
 
 ```bash
 npm i @mgpl-diagnostics/report-kit react react-dom
 ```
 
-**B. Straight from the repo** (the built `dist/` is committed, so nothing is compiled on install):
+<details>
+<summary>Installing from GitHub Packages</summary>
 
-```bash
-npm i github:mgpl-diagnostics/report-kit#v1.0.0 react react-dom
+```ini
+# .npmrc
+@mgpl-diagnostics:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}   # token with read:packages
 ```
 
-Requires Node ≥ 20 and React ≥ 18.
-
-## Quick start
+or straight from git: `npm i github:mgpl-diagnostics/report-kit#v2.0.0` (built on install).
+</details>
 
 ```ts
-import { buildReport } from "@mgpl-diagnostics/report-kit";
+import { buildReport, renderReportPdf } from "@mgpl-diagnostics/report-kit";
 
 const report = buildReport(
-  { title: "Mrs", name: "Kavita Sharma", age: 32, sex: "Female",
-    patientId: "MGPL1025", sampleId: "S2610120398", refDoctor: "Self",
-    sampleCollectionDate: new Date(), reportedAt: new Date() },
+  { title: "Mrs", name: "Kavita Sharma", age: 32, sex: "Female", patientId: "MGPL1025", refDoctor: "Self" },
   [
-    { template: "cbc", results: { hb: "10.8", rbc: "4.23", wbc: "6700", plt: "2.45" } },
-    { template: "kft", results: { urea: "28", creatinine: "0.9", sodium: "138" } },
+    { template: "cbc", results: { hb: "10.8", wbc: "6700", plt: "2.45" } },
+    { template: "kft", results: { urea: "28", creatinine: "0.9" } },
   ],
 );
+
+const pdf: Buffer = await renderReportPdf({ report, variant: "header" }); // A4, ready to print or email
 ```
 
-### Next.js / React (HTML preview)
+## Mount it anywhere
 
-```tsx
-import { LabReport } from "@mgpl-diagnostics/report-kit";
+The HTTP API is a standard `(Request) => Response` handler, so it fits every Node.js backend:
 
-export default function Page() {
-  return <LabReport report={report} variant="header" />;   // design="classic" for the Word look
-}
-```
-
-The components are pure (no hooks), so they render in Server Components. They load fonts and images
-from `/report-fonts` and `/report-assets`, so copy those into `public/` once:
-
-```jsonc
-// package.json of the app
-"scripts": { "postinstall": "mgpl-report-assets public" }
-```
-
-Add this to `next.config.ts`:
+<table>
+<tr><th>Next.js (App Router)</th><th>Fastify</th></tr>
+<tr>
+<td>
 
 ```ts
-serverExternalPackages: ["@react-pdf/renderer", "@resvg/resvg-js"]
-```
+// app/api/mgpl/[...path]/route.ts
+import { createReportApi } from "@mgpl-diagnostics/report-kit";
 
-### PDF (Node.js — route handler, server action, Express, worker…)
-
-```ts
-import { renderReportPdf, renderLetterheadPdf } from "@mgpl-diagnostics/report-kit/pdf";
-
-const pdf: Buffer = await renderReportPdf({ report, variant: "header" });       // A4
-const blankLetterhead: Buffer = await renderLetterheadPdf();
-```
-
-Next.js route handler:
-
-```ts
+const api = createReportApi({ basePath: "/api/mgpl" });
+export { api as GET, api as POST, api as OPTIONS };
 export const runtime = "nodejs";
-export async function POST(req: Request) {
-  const { report, variant } = await req.json();
-  const pdf = await renderReportPdf({ report, variant });
-  return new Response(new Uint8Array(pdf), { headers: { "Content-Type": "application/pdf" } });
-}
 ```
 
-### Self-contained HTML (backend, email, archive)
+</td>
+<td>
 
 ```ts
-import { renderReportHtml } from "@mgpl-diagnostics/report-kit/server";
-const html = await renderReportHtml({ report, variant: "header" });  // fonts + images inlined
+import Fastify from "fastify";
+import { mgplFastify } from "@mgpl-diagnostics/report-kit/fastify";
+
+const app = Fastify();
+await app.register(mgplFastify, { prefix: "/api/mgpl" });
+await app.listen({ port: 4000 });
 ```
 
-## Entry points
+</td>
+</tr>
+<tr><th>Express / node:http</th><th>Hono · Bun · Deno</th></tr>
+<tr>
+<td>
 
-| Import | Environment | Contents |
+```ts
+import { createReportApi, toNodeHandler } from "@mgpl-diagnostics/report-kit";
+
+app.use("/api/mgpl", toNodeHandler(createReportApi()));
+// mount before express.json()
+```
+
+</td>
+<td>
+
+```ts
+const api = createReportApi({ basePath: "/api/mgpl" });
+app.all("/api/mgpl/*", (c) => api(c.req.raw));      // Hono
+Bun.serve({ fetch: api });                           // Bun
+```
+
+</td>
+</tr>
+</table>
+
+Need invoices too? Mount [`createMgplApi()` from invoice-kit](https://github.com/mgpl-diagnostics/invoice-kit) instead. It serves every report route as well.
+
+## HTTP API
+
+| Method & route | Body / query | Returns |
 |---|---|---|
-| `@mgpl-diagnostics/report-kit` | browser + server | components, templates, `buildReport`, types, samples, layout constants |
-| `@mgpl-diagnostics/report-kit/pdf` | Node only | `renderReportPdf`, `renderLetterheadPdf`, react-pdf documents, asset helpers |
-| `@mgpl-diagnostics/report-kit/server` | Node only | `renderReportHtml`, `renderLetterheadHtml`, `inlineLab`, `assetsDir` |
-| `@mgpl-diagnostics/report-kit/assets/*` | files | `report-assets/*` (logo, icons, stamp, signatures), `report-fonts/*.woff` |
+| `GET /templates` | | every test with its result fields + profiles (build entry forms from it) |
+| `POST /report` | `{ patient, tests }` · `{ patient, profile }` · `{ report }` + `variant`, `design`, `format` | PDF (default) or HTML |
+| `GET /letterhead` | `?format=pdf\|html` | blank stationery |
+| `GET /assets/*` | | fonts and images used by the HTML output (cached for a year) |
+| `GET /samples` | | demo reports, only with `samples: true` |
+| `GET /health` | | `{ ok: true }` |
 
-The full API is in [docs/api.md](docs/api.md).
+Errors are JSON `{ "error": "…" }` with `400` (bad input), `404`, `405`, `413` (body too large) or `500`.
+`OPTIONS` preflight and `cors` are built in for frontends on another origin.
 
-## Results and templates
+## Tests and profiles
 
-```ts
-import { TEMPLATES, PROFILES, buildProfileReport } from "@mgpl-diagnostics/report-kit";
+| Department | Templates |
+|---|---|
+| **Hematology** | CBC · Haemoglobin · ESR · Blood group · Malaria (card) · BT/CT · PT/INR |
+| **Biochemistry** | Blood sugar (F/PP/R) · HbA1c · LFT · RFT · KFT · Electrolytes · Lipid · Iron profile · single tests |
+| **Immunoassay** | Thyroid (T3/T4/TSH/FT3/FT4) · Vitamin D · Vitamin B12 · PSA |
+| **Serology** | Dengue · HIV/HBsAg/VDRL/HCV · Widal · Typhidot · Malaria antigen · CRP/ASO · RA factor |
+| **Clinical pathology** | Urine routine · Urine pregnancy · Stool · Semen analysis |
 
-TEMPLATES.lft.fields;   // [{ key: "bilTotal", label: "Bilirubin Total", unit: "Mg/dL", range: "0 – 1.0" }, …]
-buildProfileReport(patient, "full-body-checkup", { cbc: {...}, lft: {...}, kft: {...} });
-```
+**Profiles:** Fever · Diabetes · Liver & Kidney · Anaemia · Antenatal · Pre-operative · Full Body Check-up.
 
-A result can be given in either of these forms:
-- a plain string, e.g. `"10.8"`;
-- an object, e.g. `{ value, flag?, range?, unit?, method? }`.
+A result is either a string (`"10.8"`) or `{ value, flag?, range?, unit?, method? }`. Numeric results are
+flagged **H/L** automatically. Use `flag: "abnormal"` for text results such as *Positive*.
 
-Numeric results are flagged **H/L** against the range automatically. Use `flag: "abnormal"` for text results such as "Positive". Ranges switch to the patient's sex where a template defines `rangeBySex`.
+<details>
+<summary>Classic design (replica of the original Word reports)</summary>
+<br/>
+<img src="docs/images/classic-header.png" width="420" alt="Classic design" />
 
-## Branding
+`design: "classic"`
+</details>
 
-Everything lab-specific is in [`src/lab.ts`](src/lab.ts) (`MGPL_LAB`):
-- name, address, phone and email;
-- signatory and signature images;
-- sidebar text and footer lines;
-- QR verify URL (`verifyBaseUrl`);
-- invoice fields (`upiId`, `gstin`, `invoiceTerms`).
+## Configuration
 
-To change an image, replace the file in `assets/report-assets/` or pass your own `lab` object. SVG and PNG both work.
+| What | Where |
+|---|---|
+| Lab name, address, phone, email, signatory, footer lines | [`src/server/lab.ts`](src/server/lab.ts) (`MGPL_LAB`), or pass `lab` to any function |
+| Logo, icons, QC stamp | replace files in [`assets/report-assets/`](assets/report-assets) (SVG or PNG) |
+| **Real signature** | **never in git.** Set `MGPL_SIGNATURE_FILE` (or `MGPL_SIGNATURE_HEADER_FILE` / `MGPL_SIGNATURE_NONHEADER_FILE`) to a private image path on the server. The repo ships a placeholder. |
+| QR verify link | `verifyBaseUrl` in the lab profile. Without it, the QR holds a plain-text summary. |
+| CORS, body limit, demo samples | `createReportApi({ cors, maxBodyBytes, samples })` |
 
 ## Printing
 
-| What | How |
-|---|---|
-| Letterhead stationery | `renderLetterheadPdf()`. Print **Borderless**, Actual size: the sidebar runs to the paper edge. |
-| Report on plain paper | `variant: "header"`, Actual size |
-| Report on pre-printed paper | `variant: "non-header"`, Actual size, paper guide snug |
+| You want | Use | Printer setting |
+|---|---|---|
+| Pre-printed stationery | `GET /letterhead?format=pdf` | **Borderless**, Actual size |
+| Report on plain paper | `variant: "header"` | Actual size |
+| Report on stationery | `variant: "non-header"` | Actual size, paper guide snug |
+
+## Project layout
+
+```
+src/server/      backend: templates, rendering (HTML + react-pdf), API, adapters
+src/shared/      types + API contract
+assets/          fonts (OFL), images, licences — shipped in the package
+scripts/         smoke test, examples, asset sync
+```
 
 ## Development
 
-This repo is developed inside a local workspace together with `invoice-kit` and `report-studio`
-(the Next.js preview app). The scripts below also work on their own.
-
 ```bash
-npm install
-npm run assets     # fonts (Fontsource) + icons (Tabler) + QC stamp → assets/
-npm run build      # tsup → dist/ (commit dist/ — it is what consumers install)
+npm install          # also builds dist/ (prepare)
 npm run typecheck
-npm run smoke      # renders everything and checks it (≈4 min)
-npm run examples   # HTML + PDF for every sample → examples/index.html
+npm run smoke        # 156 renders: every sample × design × variant, HTML + PDF, text verified inside the PDFs
+npm run examples     # examples/index.html — HTML + PDF of every sample
 ```
 
-See [AGENTS.md](AGENTS.md) for the architecture, rules and gotchas. It is useful for both humans and AI agents.
+Read **[AGENTS.md](AGENTS.md)** before changing layout or templates. It lists the invariants and the
+react-pdf pitfalls this project has already hit. Full API: **[docs/api.md](docs/api.md)**. AI index: [llms.txt](llms.txt) · [llms-full.txt](llms-full.txt).
 
-## Release
+## Part of MGPL Diagnostics
 
-1. Bump `version` in `package.json`, `npm run build`, commit (including `dist/`).
-2. `git tag vX.Y.Z && git push --tags`. The GitHub Action publishes to GitHub Packages.
+| Repo | Side | |
+|---|---|---|
+| **report-kit** | backend | reports, letterhead, templates |
+| [invoice-kit](https://github.com/mgpl-diagnostics/invoice-kit) | backend | patient invoices + combined API |
+| [client](https://github.com/mgpl-diagnostics/client) | frontend | headless SDK, zero dependencies |
+| [report-studio](https://github.com/mgpl-diagnostics/report-studio) | app | Next.js reference app |
+
+<sub>© MGPL Diagnostics (Maa Gayatri Path Lab). All rights reserved; see [LICENSE](LICENSE). Bundled fonts and icons keep their own licences; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Reference ranges must be verified by a qualified pathologist.</sub>

@@ -1,32 +1,33 @@
 # @mgpl-diagnostics/report-kit
 
-> TypeScript library that renders A4 pathology lab reports for MGPL Diagnostics (Maa Gayatri Path Lab) as React HTML and as pure Node.js PDFs (react-pdf, no browser). Two designs (`sidebar` Navy Sidebar default, `classic` Word replica), two variants (`header` with letterhead, `non-header` for pre-printed paper), 31 test templates + 7 profiles, automatic H/L flags, barcode + QR. Works in Next.js, React and Node backends.
+> Backend-only TypeScript library (Node.js >= 20) that renders A4 pathology lab reports for MGPL Diagnostics (Maa Gayatri Path Lab) as PDF (react-pdf, no browser) or HTML, and serves them over an HTTP API that mounts in Next.js route handlers, Fastify (plugin), Express/node:http (adapter), Hono, Bun or Deno. Two designs (`sidebar` Navy Sidebar default, `classic`), two variants (`header`, `non-header` for pre-printed paper), 31 test templates + 7 profiles, automatic H/L flags, barcode + QR. Frontends never import this package; they use @mgpl-diagnostics/client.
 
 Key facts for agents:
-- Build a report with `buildReport(patient, [{ template: "cbc", results: { hb: "10.8" } }])`; template ids are in `TEMPLATES`, each lists its result keys in `.fields`.
-- Render HTML with `<LabReport report variant="header" />` from the main entry (pure component, RSC-safe); PDF with `renderReportPdf({ report, variant })` from `/pdf`; standalone HTML with `renderReportHtml` from `/server` (Node only).
-- HTML needs `/report-fonts` + `/report-assets` served: run `npx mgpl-report-assets public`. PDF/server need nothing (assets ship in the package).
-- In Next.js add `serverExternalPackages: ["@react-pdf/renderer", "@resvg/resvg-js"]` and use `runtime = "nodejs"` for PDF routes.
-- Geometry lives in `src/sidebar/layout.ts` / `src/layout.ts`; both renderers share it plus a row-height model, so HTML and PDF paginate identically. Never change one renderer only.
-- react-pdf drops text that overflows its box and crashes on missing glyphs; run `npm run smoke` (checks fit, glyphs, PDF text, page parity) after any change.
-- Money/ranges: use ASCII (`>=`, `Rs.`); fonts lack `≥` and `₹`.
+- Mount: `createReportApi({ basePath: "/api/mgpl" })` returns `(Request) => Response`. Fastify: `mgplFastify` from "@mgpl-diagnostics/report-kit/fastify". Express: `toNodeHandler(api)`. For reports + invoices use `createMgplApi()` from @mgpl-diagnostics/invoice-kit.
+- Routes: GET /templates, POST /report (pdf|html), GET /letterhead, GET /assets/*, GET /samples (opt-in), GET /health. Errors are JSON `{ error }` (400/404/405/413/500).
+- In code: `buildReport(patient, [{ template: "cbc", results: { hb: "10.8" } }])` then `renderReportPdf({ report, variant })`. Template ids and their result keys: `TEMPLATES[id].fields` or GET /templates.
+- Real signatures are never in git: set MGPL_SIGNATURE_FILE (or _HEADER_FILE / _NONHEADER_FILE) on the server; `defaultLab()` loads them. Lab branding (including the contact email) lives only in src/server/lab.ts.
+- HTML and PDF share src/server/sidebar/layout.ts + measure.ts; change both renderers together. react-pdf silently drops overflowing text and crashes on missing glyphs (write ">=", "Rs."); run `npm run smoke` after changes.
+- dist/ is git-ignored; `prepare` builds it. Licence: all rights reserved.
 
 ## Docs
 
-- [README](README.md): install (GitHub Packages or git), quick start for Next.js, React, Node, printing
-- [API reference](docs/api.md): every export, type, template id and option
-- [AGENTS.md](AGENTS.md): architecture, file map, invariants, react-pdf gotchas, how to add templates
+- [README](README.md): overview, mounting in each backend, HTTP API, templates, configuration, printing
+- [API reference](docs/api.md): every export, option, route and type
+- [AGENTS.md](AGENTS.md): architecture, file map, invariants, react-pdf pitfalls, how-tos
+- [llms-full.txt](llms-full.txt): all of the above plus the key source files in one document
 
-## Source entry points
+## Source
 
-- [src/index.ts](src/index.ts): browser-safe exports
-- [src/pdf/index.ts](src/pdf/index.ts): Node PDF export
-- [src/server.ts](src/server.ts): Node HTML string export
-- [src/templates/index.ts](src/templates/index.ts): TEMPLATES, PROFILES, buildReport
-- [src/lab.ts](src/lab.ts): lab branding (MGPL_LAB)
-- [src/types.ts](src/types.ts): data model
+- [src/server/index.ts](src/server/index.ts): package entry
+- [src/server/api.ts](src/server/api.ts): HTTP API
+- [src/server/fastify.ts](src/server/fastify.ts): Fastify plugin
+- [src/shared/api.ts](src/shared/api.ts): HTTP contract types
+- [src/shared/types.ts](src/shared/types.ts): data model
+- [src/server/templates/index.ts](src/server/templates/index.ts): TEMPLATES, PROFILES, buildReport
 
 ## Optional
 
-- [Invoice kit](https://github.com/mgpl-diagnostics/invoice-kit): patient invoices on the same letterhead
-- [Report studio](https://github.com/mgpl-diagnostics/report-studio): Next.js preview app and reference integration
+- [invoice-kit](https://github.com/mgpl-diagnostics/invoice-kit): invoices + combined API
+- [client](https://github.com/mgpl-diagnostics/client): frontend SDK
+- [report-studio](https://github.com/mgpl-diagnostics/report-studio): Next.js reference app
