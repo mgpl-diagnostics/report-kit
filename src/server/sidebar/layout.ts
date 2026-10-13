@@ -51,8 +51,10 @@ export const SB_PATIENT = {
 /** Result area (between patient block and signature zone) */
 export const SB_BODY = { top: 2.92, bottom: 9.55 };
 
+const SB_QC_SIZE = 0.72;
 export const SB_SIGN = {
-  qc: { x: 4.95, y: 9.7, s: 0.72 },
+  /** QC stamp: bottom centre of the content column, in the signature band */
+  qc: { x: SB_CONTENT.x + (SB_CONTENT.w - SB_QC_SIZE) / 2, y: 9.7, s: SB_QC_SIZE },
   sign: { w: 1.45, h: 0.47, y: 9.66 },
   /** signature block is centred on this x (keeps the 1.9in-wide name inside the margin) */
   centerX: SB_RIGHT - 1.15,
