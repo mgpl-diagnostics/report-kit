@@ -198,9 +198,9 @@ Results imported from a partner lab's report (the api reads the partner's PDF wi
   accredited laboratory (Certificate No. …) · Reported by Dr …, MD (…)*. It is text only. Never pass a NABL or ilac
   logo: only the accredited lab may use the mark.
 - Navy Sidebar design only: on a page where every test comes from the same partner document (`sourceId`), the
-  partner's medical signatory is printed with their signature. By default it goes **beside** ours (left of the QC
-  stamp). Set `report.partnerSignatory` to `"instead"` to print it in place of ours, or `"none"` to print the
-  per-test lines only. The QC stamp always stays. A page that mixes sources prints the per-test lines only.
+  partner's medical signatory is printed with their signature. By default it goes **instead** of ours, in our
+  signatory's place. Set `report.partnerSignatory` to `"beside"` to print both (the partner's left of the QC stamp),
+  or `"none"` to print the per-test lines only. The QC stamp always stays. A page that mixes sources prints the per-test lines only.
 - `signatureSrc` must be the signature from those results' own source document. The package never ships or
   stores partner signatures: the server passes them in at render time, and the PDF renderer does not cache them.
 

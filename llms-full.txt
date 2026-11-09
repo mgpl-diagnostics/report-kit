@@ -256,9 +256,9 @@ Results imported from a partner lab's report (the api reads the partner's PDF wi
   accredited laboratory (Certificate No. …) · Reported by Dr …, MD (…)*. It is text only. Never pass a NABL or ilac
   logo: only the accredited lab may use the mark.
 - Navy Sidebar design only: on a page where every test comes from the same partner document (`sourceId`), the
-  partner's medical signatory is printed with their signature. By default it goes **beside** ours (left of the QC
-  stamp). Set `report.partnerSignatory` to `"instead"` to print it in place of ours, or `"none"` to print the
-  per-test lines only. The QC stamp always stays. A page that mixes sources prints the per-test lines only.
+  partner's medical signatory is printed with their signature. By default it goes **instead** of ours, in our
+  signatory's place. Set `report.partnerSignatory` to `"beside"` to print both (the partner's left of the QC stamp),
+  or `"none"` to print the per-test lines only. The QC stamp always stays. A page that mixes sources prints the per-test lines only.
 - `signatureSrc` must be the signature from those results' own source document. The package never ships or
   stores partner signatures: the server passes them in at render time, and the PDF renderer does not cache them.
 
@@ -1203,12 +1203,12 @@ async function main() {
     if (!lipid || !thyroid) warn("partner-lab sample: expected an accredited and an unaccredited imported test");
     if (thyroid && sbProvenanceLines(thyroid).join(" ").includes("NABL")) warn("partner-lab: an unaccredited test must not print NABL");
     const partner = SAMPLES.find((x) => x.id === "partner-lab")!.tests[0]!.provenance!.reportedBy![0]!;
-    const sb = renderToStaticMarkup(<LabReport design="sidebar" report={report} variant="header" />);
+    const sb = renderToStaticMarkup(<LabReport design="sidebar" report={{ ...report, partnerSignatory: "beside" }} variant="header" />);
     if (!sb.includes(esc(partner.name)) || !sb.includes(`class="sb-psign"`) || !sb.includes(lab.signatory.name)) warn("partner-lab sidebar: partner signatory beside ours expected");
     if (!sb.includes(esc(sbProvenanceLines(lipid!)[0]!))) warn("partner-lab sidebar: provenance line missing from the HTML");
     if (/nabl[^"]*\.(svg|png)|ilac/i.test(sb)) warn("partner-lab: no accreditation logo may be drawn");
-    const instead = renderToStaticMarkup(<LabReport design="sidebar" report={{ ...report, partnerSignatory: "instead" }} variant="header" />);
-    if (instead.includes(lab.signatory.name) || !instead.includes(esc(partner.name)) || !instead.includes("sb-qc")) warn("partner-lab sidebar instead: our signatory replaced, QC stamp kept");
+    const instead = renderToStaticMarkup(<LabReport design="sidebar" report={report} variant="header" />);
+    if (instead.includes(lab.signatory.name) || !instead.includes(esc(partner.name)) || !instead.includes("sb-qc")) warn("partner-lab sidebar (default instead): our signatory replaced, QC stamp kept");
     const none = renderToStaticMarkup(<LabReport design="sidebar" report={{ ...report, partnerSignatory: "none" }} variant="header" />);
     if (none.includes(`class="sb-psign"`) || !none.includes("Performed at")) warn("partner-lab sidebar none: per-test lines only");
     const mixed = { ...report, sections: [...report.sections, ...getSampleReport("hb")!.sections] };
@@ -3610,7 +3610,7 @@ export function SidebarReport({ report, variant, lab = MGPL_LAB, includeStyles =
   const bar = report.patient.patientId ? barcodeSvg(report.patient.patientId) : null;
   const qr = qrSvg(reportQrValue(report, lab));
   const signature = variant === "header" ? lab.signatory.signatureHeaderSrc : lab.signatory.signatureNonHeaderSrc;
-  const placement = report.partnerSignatory ?? "beside";
+  const placement = report.partnerSignatory ?? "instead";
   return (
     <div className="sb-doc">
       {includeStyles && <style dangerouslySetInnerHTML={{ __html: sidebarCss(fontBase) }} />}
@@ -3957,7 +3957,7 @@ export function SidebarReportPdf({ report, variant, lab, images }: { report: Rep
   const pages = sbLayoutPages(report);
   const p = SB_PATIENT;
   const qrX = SB_RIGHT - p.barcode.w / 2 - p.qr.s / 2;
-  const placement = report.partnerSignatory ?? "beside";
+  const placement = report.partnerSignatory ?? "instead";
   return (
     <Document title={`${report.patient.name} - Lab Report`} author={lab.name} creator={lab.name} producer={lab.name}>
       {pages.map((page, n) => {
@@ -6519,7 +6519,7 @@ export interface Report {
   qrValue?: string;
   /**
    * Navy Sidebar design: on a page whose tests all come from one partner document (`provenance.sourceId`),
-   * print the partner's medical signatory "beside" our own signatory (default), "instead" of it, or
+   * print the partner's medical signatory "instead" of our own signatory (default, the owner's choice), "beside" it, or
    * not at all ("none"). The QC stamp always stays. The per-test provenance lines print in every case.
    */
   partnerSignatory?: "beside" | "instead" | "none";

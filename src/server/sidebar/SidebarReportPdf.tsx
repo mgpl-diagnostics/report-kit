@@ -47,7 +47,7 @@ export function SidebarReportPdf({ report, variant, lab, images }: { report: Rep
   const pages = sbLayoutPages(report);
   const p = SB_PATIENT;
   const qrX = SB_RIGHT - p.barcode.w / 2 - p.qr.s / 2;
-  const placement = report.partnerSignatory ?? "beside";
+  const placement = report.partnerSignatory ?? "instead";
   return (
     <Document title={`${report.patient.name} - Lab Report`} author={lab.name} creator={lab.name} producer={lab.name}>
       {pages.map((page, n) => {

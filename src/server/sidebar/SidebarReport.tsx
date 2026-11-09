@@ -30,7 +30,7 @@ export function SidebarReport({ report, variant, lab = MGPL_LAB, includeStyles =
   const bar = report.patient.patientId ? barcodeSvg(report.patient.patientId) : null;
   const qr = qrSvg(reportQrValue(report, lab));
   const signature = variant === "header" ? lab.signatory.signatureHeaderSrc : lab.signatory.signatureNonHeaderSrc;
-  const placement = report.partnerSignatory ?? "beside";
+  const placement = report.partnerSignatory ?? "instead";
   return (
     <div className="sb-doc">
       {includeStyles && <style dangerouslySetInnerHTML={{ __html: sidebarCss(fontBase) }} />}

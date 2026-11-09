@@ -261,7 +261,7 @@ export interface Report {
   qrValue?: string;
   /**
    * Navy Sidebar design: on a page whose tests all come from one partner document (`provenance.sourceId`),
-   * print the partner's medical signatory "beside" our own signatory (default), "instead" of it, or
+   * print the partner's medical signatory "instead" of our own signatory (default, the owner's choice), "beside" it, or
    * not at all ("none"). The QC stamp always stays. The per-test provenance lines print in every case.
    */
   partnerSignatory?: "beside" | "instead" | "none";

@@ -262,12 +262,12 @@ async function main() {
     if (!lipid || !thyroid) warn("partner-lab sample: expected an accredited and an unaccredited imported test");
     if (thyroid && sbProvenanceLines(thyroid).join(" ").includes("NABL")) warn("partner-lab: an unaccredited test must not print NABL");
     const partner = SAMPLES.find((x) => x.id === "partner-lab")!.tests[0]!.provenance!.reportedBy![0]!;
-    const sb = renderToStaticMarkup(<LabReport design="sidebar" report={report} variant="header" />);
+    const sb = renderToStaticMarkup(<LabReport design="sidebar" report={{ ...report, partnerSignatory: "beside" }} variant="header" />);
     if (!sb.includes(esc(partner.name)) || !sb.includes(`class="sb-psign"`) || !sb.includes(lab.signatory.name)) warn("partner-lab sidebar: partner signatory beside ours expected");
     if (!sb.includes(esc(sbProvenanceLines(lipid!)[0]!))) warn("partner-lab sidebar: provenance line missing from the HTML");
     if (/nabl[^"]*\.(svg|png)|ilac/i.test(sb)) warn("partner-lab: no accreditation logo may be drawn");
-    const instead = renderToStaticMarkup(<LabReport design="sidebar" report={{ ...report, partnerSignatory: "instead" }} variant="header" />);
-    if (instead.includes(lab.signatory.name) || !instead.includes(esc(partner.name)) || !instead.includes("sb-qc")) warn("partner-lab sidebar instead: our signatory replaced, QC stamp kept");
+    const instead = renderToStaticMarkup(<LabReport design="sidebar" report={report} variant="header" />);
+    if (instead.includes(lab.signatory.name) || !instead.includes(esc(partner.name)) || !instead.includes("sb-qc")) warn("partner-lab sidebar (default instead): our signatory replaced, QC stamp kept");
     const none = renderToStaticMarkup(<LabReport design="sidebar" report={{ ...report, partnerSignatory: "none" }} variant="header" />);
     if (none.includes(`class="sb-psign"`) || !none.includes("Performed at")) warn("partner-lab sidebar none: per-test lines only");
     const mixed = { ...report, sections: [...report.sections, ...getSampleReport("hb")!.sections] };
