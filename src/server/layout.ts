@@ -67,6 +67,9 @@ export const SECTION = {
 
 export const END = { marginTop: 0.22, size: 8 };
 
+/** "Performed at … · Reported by …" under a test performed by a partner lab: 8pt, wrapped at maxChars (fits SECTION.normal.w). */
+export const PROVENANCE = { size: 8, maxChars: 105, padTop: 3, color: "#404040" };
+
 export const FOOTER_HEADER = {
   emailIcon: { x: 0.66, y: 10.25, s: 0.33 },
   phoneIcon: { x: 0.66, y: 10.58, s: 0.32 },

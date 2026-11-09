@@ -58,7 +58,10 @@ export async function renderReportPdf(opts: RenderPdfOptions): Promise<Buffer> {
     return render(createElement(ReportPdf, { report: opts.report, variant: opts.variant, lab, images }));
   }
   const qr = svgToPng(qrSvg(reportQrValue(opts.report, lab)), 800);
-  const images = { logo, email, phone, qc, signature, barcode, qr };
+  // partner signatures of imported results (data URIs built by the server from the same source document)
+  const partnerSrcs = [...new Set(opts.report.sections.flatMap((s) => s.provenance?.reportedBy ?? []).map((r) => r.signatureSrc).filter((x): x is string => !!x))];
+  const partner = new Map(await Promise.all(partnerSrcs.map(async (src) => [src, await loadImage(src, publicDir, { cache: false })] as const)));
+  const images = { logo, email, phone, qc, signature, barcode, qr, partner };
   return render(createElement(SidebarReportPdf, { report: opts.report, variant: opts.variant, lab, images }));
 }
 

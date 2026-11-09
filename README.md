@@ -180,6 +180,30 @@ Errors are JSON `{ "error": "…" }` with `400` (bad input), `404`, `405`, `413`
 A result is either a string (`"10.8"`) or `{ value, flag?, range?, unit?, method? }`. Numeric results are
 flagged **H/L** automatically. Use `flag: "abnormal"` for text results such as *Positive*.
 
+### Tests performed by a partner lab
+
+Results imported from a partner lab's report (the api reads the partner's PDF with report-reader) carry a
+`provenance` on their test (`tests[].provenance` in a request, `Section.provenance` in a built report):
+
+```ts
+{ template: "lipid", results, provenance: {
+  performedBy: "Clinova Pathlabs", performedAt: "Secunderabad",
+  accreditationText: "NABL accredited laboratory (Certificate No. MC-…)",   // only when the partner marked this test
+  reportedBy: [{ name: "Dr …", qualification: "MD (Pathology)", registration: "Reg. No. …", signatureSrc: "data:image/png;base64,…" }],
+  sourceId: "<sha256 of the partner PDF>",
+} }
+```
+
+- One small line is printed under the test, in both designs: *Performed at Clinova Pathlabs, Secunderabad · NABL
+  accredited laboratory (Certificate No. …) · Reported by Dr …, MD (…)*. It is text only. Never pass a NABL or ilac
+  logo: only the accredited lab may use the mark.
+- Navy Sidebar design only: on a page where every test comes from the same partner document (`sourceId`), the
+  partner's medical signatory is printed with their signature. By default it goes **instead** of ours, in our
+  signatory's place. Set `report.partnerSignatory` to `"beside"` to print both (the partner's left of the QC stamp),
+  or `"none"` to print the per-test lines only. The QC stamp always stays. A page that mixes sources prints the per-test lines only.
+- `signatureSrc` must be the signature from those results' own source document. The package never ships or
+  stores partner signatures: the server passes them in at render time, and the PDF renderer does not cache them.
+
 <details>
 <summary>Classic design (replica of the original Word reports)</summary>
 <br/>

@@ -28,7 +28,9 @@ import {
 } from "../src/server";
 import { renderLetterheadPdf, renderReportPdf } from "../src/server";
 import { gridColumns, isTwoColumn, LEGAL, LEGEND, patientFields, sectionMeta, TWO_COL_RESULT_W } from "../src/server/sidebar/model";
-import { displayRows, subtitleOf } from "../src/server/sidebar/measure";
+import { displayRows, sbProvenanceLines, subtitleOf } from "../src/server/sidebar/measure";
+import { classicProvenanceLines } from "../src/server/measure";
+import { pagePartner, partnerLines } from "../src/server/provenance";
 import { getSampleReport, SAMPLES } from "../src/server";
 
 const root = process.cwd();
@@ -58,7 +60,9 @@ function checkGlyphs(where: string, text: string, fonts: fontkit.Font[]) {
 function allText(report: Report): string {
   const out: string[] = patientFields(report).flatMap((f) => [f.label, f.value]);
   for (const s of report.sections) {
-    out.push(s.title, s.subtitle ?? "", sectionMeta(s), ...s.columns.map((c) => c.header));
+    out.push(s.title, s.subtitle ?? "", sectionMeta(s), ...s.columns.map((c) => c.header), ...sbProvenanceLines(s));
+    const partner = pagePartner([s]);
+    if (partner) out.push(...partnerLines(partner));
     for (const r of s.rows) {
       if (r.kind === "heading") out.push(r.text);
       if (r.kind === "test") out.push(r.name, r.abbr ?? "", r.result ?? "", r.unit ?? "", ...(Array.isArray(r.range) ? r.range : [r.range ?? ""]), r.method ?? "");
@@ -73,6 +77,11 @@ function allText(report: Report): string {
 function fitClassic(id: string, report: Report) {
   const w = (t: string, size: number, bold: boolean, helv: boolean) => widthIn(bold ? carlito[700] : carlito[400], t, size) * (helv ? 1.12 : 1);
   for (const s of report.sections) {
+    const room = (s.wide ? 7.38 : 6.27) - 0.02;
+    for (const l of classicProvenanceLines(s)) {
+      const need = widthIn(carlito[400], l, 8);
+      if (need > room) warn(`classic ${id}: provenance line "${l}" needs ${need.toFixed(2)}in, has ${room.toFixed(2)}in`);
+    }
     const st = s.style ?? {};
     const f = st.fontSize ?? 11;
     const helv = /arial|helvetica/i.test(st.font ?? "");
@@ -111,6 +120,14 @@ function fitSidebar(id: string, report: Report) {
     check(`patient "${f.label}" = "${f.value}"`, widthIn(manrope[f.strong ? 800 : 600], f.value, SB_PATIENT.grid.valueSize), SB_PATIENT.grid.colW - 0.08),
   );
   for (const s of report.sections) {
+    for (const l of sbProvenanceLines(s)) check(`provenance line "${l}"`, widthIn(manrope[400], l, SIDEBAR_LAYOUT.SB_PROVENANCE.size), SB_CONTENT.w - SB_CELL_PAD);
+    const partner = pagePartner([s]);
+    if (partner) {
+      const [name, ...rest] = partnerLines(partner);
+      const P = SIDEBAR_LAYOUT.SB_PARTNER;
+      check(`partner signatory "${name}"`, widthIn(manrope[800], name, P.nameSize), P.w);
+      for (const l of rest) check(`partner signatory line "${l}"`, widthIn(manrope[400], l, P.lineSize), P.w);
+    }
     check(`title "${s.title}"`, widthIn(manrope[800], s.title, 11.5), SB_CONTENT.w);
     const sub = subtitleOf(s);
     if (sub) check(`subtitle "${sub}"`, widthIn(manrope[700], sub, 10), SB_CONTENT.w);
@@ -148,7 +165,10 @@ function fitSidebar(id: string, report: Report) {
 function expectedValues(report: Report): string[] {
   const p = report.patient;
   const out = [p.name, String(p.age), p.sex];
-  for (const s of report.sections) for (const r of s.rows) if (r.kind === "test" && r.result) out.push(r.result);
+  for (const s of report.sections) {
+    for (const r of s.rows) if (r.kind === "test" && r.result) out.push(r.result);
+    if (s.provenance) out.push(`Performed at ${s.provenance.performedBy}`);
+  }
   return out.filter(Boolean);
 }
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -233,6 +253,31 @@ async function main() {
         }
       }
     }
+  }
+
+  /* imported (partner-lab) results: per-test line, NABL only where marked, partner signatory */
+  {
+    const report = getSampleReport("partner-lab")!;
+    const [lipid, thyroid] = [report.sections.find((x) => x.provenance?.accreditationText), report.sections.find((x) => x.provenance && !x.provenance.accreditationText)];
+    if (!lipid || !thyroid) warn("partner-lab sample: expected an accredited and an unaccredited imported test");
+    if (thyroid && sbProvenanceLines(thyroid).join(" ").includes("NABL")) warn("partner-lab: an unaccredited test must not print NABL");
+    const partner = SAMPLES.find((x) => x.id === "partner-lab")!.tests[0]!.provenance!.reportedBy![0]!;
+    const sb = renderToStaticMarkup(<LabReport design="sidebar" report={{ ...report, partnerSignatory: "beside" }} variant="header" />);
+    if (!sb.includes(esc(partner.name)) || !sb.includes(`class="sb-psign"`) || !sb.includes(lab.signatory.name)) warn("partner-lab sidebar: partner signatory beside ours expected");
+    if (!sb.includes(esc(sbProvenanceLines(lipid!)[0]!))) warn("partner-lab sidebar: provenance line missing from the HTML");
+    if (/nabl[^"]*\.(svg|png)|ilac/i.test(sb)) warn("partner-lab: no accreditation logo may be drawn");
+    const instead = renderToStaticMarkup(<LabReport design="sidebar" report={report} variant="header" />);
+    if (instead.includes(lab.signatory.name) || !instead.includes(esc(partner.name)) || !instead.includes("sb-qc")) warn("partner-lab sidebar (default instead): our signatory replaced, QC stamp kept");
+    const none = renderToStaticMarkup(<LabReport design="sidebar" report={{ ...report, partnerSignatory: "none" }} variant="header" />);
+    if (none.includes(`class="sb-psign"`) || !none.includes("Performed at")) warn("partner-lab sidebar none: per-test lines only");
+    const mixed = { ...report, sections: [...report.sections, ...getSampleReport("hb")!.sections] };
+    if (sbLayoutPages(mixed).length === 1 && renderToStaticMarkup(<LabReport design="sidebar" report={mixed} variant="header" />).includes(`class="sb-psign"`))
+      warn("partner-lab sidebar: a page that mixes our tests and imported ones must not print the partner signatory");
+    const pdfText1 = await pdfText(await renderReportPdf({ report, variant: "non-header", design: "sidebar" }));
+    if (!pdfText1.includes(squash(partner.name)) || !pdfText1.includes(squash(sbProvenanceLines(lipid!)[0]!))) warn("partner-lab sidebar PDF: partner signatory or provenance line missing");
+    const cl = await pdfText(await renderReportPdf({ report, variant: "header", design: "classic" }));
+    if (!cl.includes(squash(classicProvenanceLines(lipid!)[0]!))) warn("partner-lab classic PDF: provenance line missing");
+    console.log("ok   partner-lab provenance, NABL only where marked, partner signatory (beside / instead / none, mixed pages)");
   }
 
   const total = SAMPLES.length * designs.length * variants.length;

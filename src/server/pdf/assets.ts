@@ -20,7 +20,9 @@ const cache = new Map<string, Promise<PdfImage>>();
  *   "data:image/svg+xml;base64,…"
  * SVGs are rasterised with resvg (react-pdf cannot embed SVG files).
  */
-export function loadImage(src: string, publicDir: string): Promise<PdfImage> {
+export function loadImage(src: string, publicDir: string, opts: { cache?: boolean } = {}): Promise<PdfImage> {
+  // per-report images (partner signatures) are not kept in this process-wide cache
+  if (opts.cache === false) return load(src, publicDir);
   const key = `${publicDir}|${src}`;
   let p = cache.get(key);
   if (!p) {

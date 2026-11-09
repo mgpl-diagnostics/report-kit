@@ -64,12 +64,28 @@ export const SB_SIGN = {
 };
 export const SB_LEGAL = { y: 10.64, size: 6.8 };
 
+/**
+ * Partner-lab signatory (imported results): left of the QC stamp ("beside"), or in our signatory's
+ * place ("instead"). Same image box and name line as ours; three short lines under the image.
+ */
+export const SB_PARTNER = {
+  /** centre of the block when printed beside ours (keeps the 2.3in-wide text clear of the QC stamp) */
+  besideX: SB_CONTENT.x + 1.2,
+  w: 2.3,
+  lineH: 0.125,
+  nameSize: 8.5,
+  lineSize: 7,
+};
+
 /* ------------------------------------------------------------- result table */
 /** Standard columns (inches, sum = content width). Sized from measured Manrope text widths:
  *  name fits "Mean Corpuscular Haemoglobin Concentration (MCHC)", result fits a bold "Non - Reactive",
  *  range fits "200 – 499: Hyper triglyceridemic". `npm run smoke` re-checks every template. */
 export const SB_COLS = { name: 3.2, result: 0.98, flag: 0.39, unit: 0.8, range: 1.6 };
 export const SB_CELL_PAD = 0.06;
+
+/** Provenance line under an imported test: 6.8pt Manrope, wrapped at this many characters (fits SB_CONTENT.w). */
+export const SB_PROVENANCE = { size: 6.8, maxChars: 125 };
 
 /** Row heights (pt). Both renderers use exactly these, so pages break identically. */
 export const SB_ROWS = {
@@ -85,5 +101,7 @@ export const SB_ROWS = {
   cells: 18,
   text: 17,
   sectionGap: 10,
+  provenanceLine: 9, // per line of the "Performed at … · Reported by …" line under an imported test
+  provenancePad: 3, // space above it
   end: 34, // legend + "End of Report"
 };

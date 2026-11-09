@@ -66,6 +66,10 @@ npm run assets      # only when fonts/icons/stamp change
    `contract-check.ts` fails the build if they drift. Change both together.
 5. **Components are pure** (no hooks, no `"use client"`), so they work in React Server Components and
    `renderToStaticMarkup`.
+6. **Imported results print their provenance as text only.** `Section.provenance` gives one line under the
+   test (`src/server/provenance.ts`, wrapped by character count and fit-checked by smoke), and in the Navy
+   Sidebar design the partner signatory block (`SB_PARTNER`) when a whole page comes from one source document.
+   Never draw an accreditation logo (NABL / ilac). Never put a real partner signature in the package.
 
 ## react-pdf gotchas (each one has bitten this project)
 
@@ -106,7 +110,7 @@ call them out.
 
 ## Testing standard
 
-`npm run smoke` renders 39 samples × 2 designs × 2 variants as HTML **and** PDF, plus the letterhead,
+`npm run smoke` renders 40 samples × 2 designs × 2 variants as HTML **and** PDF, plus the letterhead,
 and fails on any of these:
 - page-count mismatch;
 - a value missing from the HTML **or from the PDF text** (extracted with pdf.js);

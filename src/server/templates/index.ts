@@ -1,4 +1,4 @@
-import type { Patient, Report } from "../../shared/types";
+import type { Patient, Report, ReportTestProvenance } from "../../shared/types";
 import { biochemistry, bloodSugar, electrolytes, hba1c, ironProfile, kft, lft, lipid, rft } from "./biochemistry";
 import { semen, stool, upt, urine } from "./clinicalPathology";
 import { bloodGroup, btCt, cbc, esr, hb, mp, ptInr } from "./hematology";
@@ -69,6 +69,8 @@ export type ProfileId = keyof typeof PROFILES;
 export interface TestInput {
   template: TemplateId | ReportTemplate<any>;
   results: Results;
+  /** The test was performed by another lab: printed under the test (see ReportTestProvenance). */
+  provenance?: ReportTestProvenance;
 }
 
 /**
@@ -81,12 +83,19 @@ export function buildReport(patient: Patient, tests: TestInput[], opts: { endTex
   return {
     patient,
     endText: opts.endText,
-    sections: tests.flatMap(({ template, results }) => {
+    sections: tests.flatMap(({ template, results, provenance }) => {
       const tpl = typeof template === "string" ? TEMPLATES[template] : template;
       if (!tpl) throw new Error(`Unknown report template "${String(template)}"`);
       return tpl
         .build(results as never, { patient })
-        .map((s) => ({ ...s, subtitle: s.subtitle ?? tpl.name, specimen: s.specimen ?? tpl.specimen, method: s.method ?? tpl.method }));
+        .map((s, k, all) => ({
+          ...s,
+          subtitle: s.subtitle ?? tpl.name,
+          specimen: s.specimen ?? tpl.specimen,
+          method: s.method ?? tpl.method,
+          // one line per test: under its last section
+          ...(provenance && k === all.length - 1 ? { provenance } : {}),
+        }));
     }),
   };
 }

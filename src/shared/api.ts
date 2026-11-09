@@ -1,7 +1,7 @@
 // The contract between the browser client and the backend API. Types + route names only —
 // no rendering code lives here, so importing it costs nothing in a client bundle.
 import type { ProfileId, Results, TemplateId } from "../server/templates";
-import type { Patient, Report, ReportDesign, ReportVariant } from "./types";
+import type { Patient, Report, ReportDesign, ReportTestProvenance, ReportVariant } from "./types";
 
 export type { ProfileId, Results, TemplateId };
 
@@ -29,7 +29,8 @@ export type OutputFormat = "pdf" | "html";
  */
 export interface ReportRequest {
   patient?: Patient;
-  tests?: { template: TemplateId; results: Results }[];
+  /** `provenance`: the test was performed by another lab (imported results); printed under the test. */
+  tests?: { template: TemplateId; results: Results; provenance?: ReportTestProvenance }[];
   profile?: { id: ProfileId; results: Partial<Record<TemplateId, Results>> };
   report?: Report;
   sample?: string;

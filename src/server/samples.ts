@@ -142,6 +142,26 @@ const NEW_TEMPLATES: TemplateId[] = [
 ];
 const FEMALE_FIRST = new Set<TemplateId>(["iron-profile", "thyroid", "vitamin-b12"]);
 
+// Results imported from a partner lab's report (fictional lab doctor, placeholder signature): the
+// per-test "Performed at …" line, the NABL text only on the accredited test, and the partner signatory.
+const PARTNER = {
+  performedBy: "Clinova Pathlabs",
+  performedAt: "Secunderabad",
+  sourceId: "fictional-partner-report",
+  reportedBy: [{ name: "Dr. Kiran Rao", qualification: "MD (Pathology)", registration: "Reg. No. TSMC-00000", title: "Consultant Pathologist", signatureSrc: "/report-assets/signature-placeholder.svg" }],
+};
+const PARTNER_SAMPLE: Sample = {
+  id: "partner-lab",
+  group: "template",
+  label: "Partner-lab results (imported)",
+  source: "Imported from a partner lab's PDF (fictional)",
+  patient: DEMO_FEMALE,
+  tests: [
+    { ...withSample("lipid"), provenance: { ...PARTNER, accreditationText: "NABL accredited laboratory (Certificate No. MC-0000)" } },
+    { ...withSample("thyroid"), provenance: PARTNER },
+  ],
+};
+
 export const SAMPLES: Sample[] = [
   ...DESIGN_SAMPLES.map((s) => ({ ...s, group: "design" as const })),
   ...NEW_TEMPLATES.map((id) => ({
@@ -160,6 +180,7 @@ export const SAMPLES: Sample[] = [
     patient: id === "antenatal-profile" || id === "anemia-profile" ? DEMO_FEMALE : DEMO_MALE,
     tests: PROFILES[id].tests.map(withSample),
   })),
+  PARTNER_SAMPLE,
 ];
 
 /** Demo sample metadata derived from the collection date (DD-MM-YYYY). */
