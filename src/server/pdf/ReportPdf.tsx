@@ -10,10 +10,11 @@ import {
   LETTERHEAD as LH,
   NON_HEADER,
   PATIENT as P,
+  PROVENANCE,
   SECTION,
   TITLE_BAR as TB,
 } from "../layout";
-import { LINE, headerCells, layoutPages, rowBox, sectionHead } from "../measure";
+import { LINE, classicProvenanceLines, headerCells, layoutPages, PROVENANCE_LINE, rowBox, sectionHead } from "../measure";
 import type { Align, Column, LabProfile, Report, ReportVariant, Rich, Row, Section, TestRow } from "../../shared/types";
 import type { PdfImage } from "./assets";
 
@@ -189,6 +190,15 @@ function SectionBlock({ section }: { section: Section }) {
           <RowView key={k} row={row} section={section} />
         ))}
       </View>
+      {section.provenance ? (
+        <View style={{ paddingTop: PROVENANCE.padTop }}>
+          {classicProvenanceLines(section).map((l, k) => (
+            <View key={k} style={{ height: PROVENANCE_LINE, justifyContent: "center" }}>
+              <Text style={{ fontFamily: FONTS.body, fontSize: PROVENANCE.size, color: PROVENANCE.color, lineHeight: 1 }}>{l}</Text>
+            </View>
+          ))}
+        </View>
+      ) : null}
     </View>
   );
 }

@@ -6,6 +6,7 @@ import {
   FOOTER_HEADER as FH,
   LETTERHEAD as LH,
   PATIENT as P,
+  PROVENANCE,
   SECTION,
   TITLE_BAR as TB,
 } from "./layout";
@@ -88,6 +89,8 @@ ${face(FONTS.address, "barlow-semi-condensed-300.woff", 300)}
 .mg-method { font-style:italic; }
 .mg-range-lines { display:flex; flex-direction:column; line-height:1.2; }
 
+.mg-prov { font-size:${PROVENANCE.size}pt; color:${PROVENANCE.color}; }
+.mg-prov div { line-height:1; display:flex; align-items:center; white-space:nowrap; }
 .mg-end { text-align:center; font-size:${END.size}pt; margin-top:${i(END.marginTop)}; }
 
 /* Footer (same position in both variants) */

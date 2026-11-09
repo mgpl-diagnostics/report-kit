@@ -4,7 +4,8 @@
  * the printed page and the PDF always break pages at the same place.
  * All values are in pt (1in = 72pt).
  */
-import { BODY_TOP, END, PATIENT, SECTION, TITLE_BAR } from "./layout";
+import { BODY_TOP, END, PATIENT, PROVENANCE, SECTION, TITLE_BAR } from "./layout";
+import { provenanceLines } from "./provenance";
 import type { Column, Report, Rich, Row, Section } from "../shared/types";
 
 export const LINE = 1.22; // Calibri / Carlito single line spacing
@@ -69,6 +70,16 @@ export function headerCells(section: Section): (Column & { spanWidth: number })[
   return out;
 }
 
+/** Provenance line(s) under an imported test, as printed (classic design). */
+export const classicProvenanceLines = (s: Section) => provenanceLines(s, PROVENANCE.maxChars);
+export const PROVENANCE_LINE = PROVENANCE.size * LINE;
+
+/** Height of the provenance block under a section (0 for our own tests), pt. */
+export function sectionFoot(section: Section): number {
+  const n = classicProvenanceLines(section).length;
+  return n ? PROVENANCE.padTop + n * PROVENANCE_LINE : 0;
+}
+
 export const END_HEIGHT = END.marginTop * IN + END.size * LINE;
 
 /** Space for sections on one page, pt */
@@ -95,32 +106,35 @@ export function layoutPages(report: Report): Section[][] {
     const lastSection = si === report.sections.length - 1;
     if (section.pageBreakBefore && pages[pages.length - 1].length) newPage();
     const head = sectionHead(section).total;
+    const foot = sectionFoot(section);
     const heights = section.rows.map((r) => rowTotal(rowBox(r, section)));
-    // what must sit together with row i: a heading needs the next row as well
+    // what must sit together with row i: a heading needs the next row as well; the provenance line
+    // (and "--End of Report--") stays with the last row
     const need = (i: number) => {
       let h = heights[i];
       if (section.rows[i].kind === "heading" && i + 1 < heights.length) h += heights[i + 1];
-      if (lastSection && i === heights.length - 1) h += END_HEIGHT;
+      if (i === heights.length - 1) h += foot + (lastSection ? END_HEIGHT : 0);
       return h;
     };
 
     let part: Row[] = [];
-    const flush = () => {
-      if (part.length || !section.rows.length) pages[pages.length - 1].push({ ...section, rows: part, pageBreakBefore: false });
+    // the provenance line prints once, under the slice that ends the section
+    const flush = (end = true) => {
+      if (part.length || !section.rows.length) pages[pages.length - 1].push({ ...section, rows: part, pageBreakBefore: false, ...(end ? {} : { provenance: undefined }) });
       part = [];
     };
 
     if (!section.rows.length) {
-      if (used + head > capacity && used > 0) newPage();
+      if (used + head + foot > capacity && used > 0) newPage();
       flush();
-      used += head + gapAfter;
+      used += head + foot + gapAfter;
       return;
     }
     if (used > 0 && used + head + need(0) > capacity) newPage();
     used += head;
     section.rows.forEach((row, i) => {
       if (part.length && used + need(i) > capacity) {
-        flush();
+        flush(false);
         newPage();
         used = head;
       }
@@ -128,7 +142,7 @@ export function layoutPages(report: Report): Section[][] {
       used += heights[i];
     });
     flush();
-    used += gapAfter;
+    used += foot + gapAfter;
   });
   return pages;
 }

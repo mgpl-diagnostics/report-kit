@@ -158,6 +158,42 @@ export interface SectionStyle {
   indent?: number;
 }
 
+/**
+ * Where a test was performed, when it was not performed by the lab itself (results imported from a
+ * partner lab's report). Printed as one small line under the test. Text only: never pass a logo, and
+ * pass `accreditationText` only for tests the performing lab marked as accredited (the accreditation is
+ * the partner's, not ours).
+ */
+export interface ReportTestProvenance {
+  /** e.g. "Clinova Pathlabs" */
+  performedBy: string;
+  /** City, when the partner's report prints it */
+  performedAt?: string;
+  /** e.g. "NABL accredited laboratory (Certificate No. MC-3860)". Only for accredited tests. */
+  accreditationText?: string;
+  /** The partner's medical signatories for this test */
+  reportedBy?: ReportTestSignatory[];
+  /**
+   * The source document (e.g. the partner PDF's sha256). When every test on a page has the same
+   * `sourceId`, that page prints the partner's signatory block (see `Report.partnerSignatory`).
+   */
+  sourceId?: string;
+  /** Prebuilt line; default: built from the parts ("Performed at … · NABL … · Reported by …"). */
+  text?: string;
+}
+
+export interface ReportTestSignatory {
+  name: string;
+  qualification?: string;
+  registration?: string;
+  title?: string;
+  /**
+   * Signature image (a data: URI the server builds). Only ever pass the signature that came with
+   * these results' own source document.
+   */
+  signatureSrc?: string;
+}
+
 export interface Section {
   /** Department title in the blue band, e.g. "HEMATOLOGY" */
   title: string;
@@ -176,6 +212,8 @@ export interface Section {
   style?: SectionStyle;
   /** Start this section on a new A4 page */
   pageBreakBefore?: boolean;
+  /** Set when the test was performed by another lab (imported results). */
+  provenance?: ReportTestProvenance;
 }
 
 /** Every image is just a URL: "/report-assets/logo.svg", "https://…", or a data: URI.
@@ -221,4 +259,10 @@ export interface Report {
   endText?: string;
   /** Override what the QR code encodes */
   qrValue?: string;
+  /**
+   * Navy Sidebar design: on a page whose tests all come from one partner document (`provenance.sourceId`),
+   * print the partner's medical signatory "beside" our own signatory (default), "instead" of it, or
+   * not at all ("none"). The QC stamp always stays. The per-test provenance lines print in every case.
+   */
+  partnerSignatory?: "beside" | "instead" | "none";
 }

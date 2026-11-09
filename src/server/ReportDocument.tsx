@@ -2,8 +2,8 @@ import type { CSSProperties, ReactNode } from "react";
 import { barcodeSvg } from "./barcode";
 import { formatDate, formatDoctor, fullName, resolveFlag } from "./format";
 import { MGPL_LAB } from "./lab";
-import { NON_HEADER, SECTION } from "./layout";
-import { headerCells, layoutPages, rowBox, sectionHead } from "./measure";
+import { NON_HEADER, PROVENANCE, SECTION } from "./layout";
+import { classicProvenanceLines, headerCells, layoutPages, PROVENANCE_LINE, rowBox, sectionHead } from "./measure";
 import { reportCss } from "./styles";
 import type { Align, Column, LabProfile, Report, ReportVariant, Rich, Row, Section, TestRow } from "../shared/types";
 
@@ -141,6 +141,15 @@ function SectionBlock({ section }: { section: Section }) {
           <RowView key={k} row={row} section={section} />
         ))}
       </div>
+      {section.provenance && (
+        <div className="mg-prov" style={{ paddingTop: pt(PROVENANCE.padTop) }}>
+          {classicProvenanceLines(section).map((l, k) => (
+            <div key={k} style={{ height: pt(PROVENANCE_LINE) }}>
+              {l}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

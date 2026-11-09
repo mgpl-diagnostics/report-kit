@@ -1,6 +1,6 @@
 {
   "name": "@mgpl-diagnostics/report-kit",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "MGPL Diagnostics lab reports — BACKEND kit (Node.js): templates, React document rendering, pure Node A4 PDF, and an HTTP API for Next.js, Fastify, Express or any backend. Frontends use @mgpl-diagnostics/client.",
   "type": "module",
   "license": "SEE LICENSE IN LICENSE",

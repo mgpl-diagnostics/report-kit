@@ -13,13 +13,16 @@ import {
   SB_HEADER,
   SB_LEGAL,
   SB_PAGE,
+  SB_PARTNER,
   SB_PATIENT,
+  SB_PROVENANCE,
   SB_RIGHT,
   SB_ROWS as R,
   SB_SIDEBAR,
   SB_SIGN,
 } from "./layout";
-import { isGrid, sbLayoutPages, sbRowHeight, showsTableHeader, subtitleOf, type SbPart } from "./measure";
+import { pagePartner, partnerLines, type PagePartner } from "../provenance";
+import { isGrid, sbLayoutPages, sbProvenanceLines, sbRowHeight, showsTableHeader, subtitleOf, type SbPart } from "./measure";
 import { flagOf, gridColumns, isTwoColumn, LEGAL, LEGEND, patientFields, sectionMeta, STD_COLUMNS, TWO_COL_RESULT_W } from "./model";
 
 /** Images pre-loaded as PNG/JPG buffers (see renderSidebarPdf). */
@@ -31,6 +34,8 @@ export interface SbPdfImages {
   signature: PdfImage;
   barcode?: PdfImage;
   qr: PdfImage;
+  /** Partner signatures (imported results), by their `signatureSrc` */
+  partner?: Map<string, PdfImage>;
 }
 
 const i = (n: number) => `${n}in`;
@@ -42,9 +47,13 @@ export function SidebarReportPdf({ report, variant, lab, images }: { report: Rep
   const pages = sbLayoutPages(report);
   const p = SB_PATIENT;
   const qrX = SB_RIGHT - p.barcode.w / 2 - p.qr.s / 2;
+  const placement = report.partnerSignatory ?? "beside";
   return (
     <Document title={`${report.patient.name} - Lab Report`} author={lab.name} creator={lab.name} producer={lab.name}>
-      {pages.map((page, n) => (
+      {pages.map((page, n) => {
+        const partner = placement === "none" ? null : pagePartner(page.parts.map((x) => x.section));
+        const ours = !(partner && placement === "instead");
+        return (
         <Page key={n} size="A4" style={pageStyle}>
           {variant === "header" && <SbLetterheadPdf lab={lab} images={images} />}
           <PatientBlock report={report} />
@@ -80,7 +89,8 @@ export function SidebarReportPdf({ report, variant, lab, images }: { report: Rep
             )}
           </View>
 
-          <Signature lab={lab} images={images} />
+          <Signature lab={lab} images={images} ours={ours} />
+          {partner && <PartnerSignatory partner={partner} images={images} centerX={placement === "instead" ? SB_SIGN.centerX : SB_PARTNER.besideX} />}
           <View
             style={{
               position: "absolute",
@@ -100,7 +110,8 @@ export function SidebarReportPdf({ report, variant, lab, images }: { report: Rep
             <Text>{`Page ${n + 1} of ${pages.length}`}</Text>
           </View>
         </Page>
-      ))}
+        );
+      })}
     </Document>
   );
 }
@@ -225,6 +236,21 @@ function SectionPart({ part }: { part: SbPart }) {
       {showsTableHeader(s) && <TableHeader section={s} />}
       {part.rows.map((row, k) => (
         <RowView key={k} row={row} section={s} />
+      ))}
+      {part.end ? <Provenance lines={sbProvenanceLines(s)} /> : null}
+    </View>
+  );
+}
+
+/** "Performed at … · Reported by …" under a test performed by a partner lab. */
+function Provenance({ lines }: { lines: string[] }) {
+  if (!lines.length) return null;
+  return (
+    <View style={{ paddingTop: R.provenancePad, paddingLeft: i(SB_CELL_PAD) }}>
+      {lines.map((l, k) => (
+        <View key={k} style={{ height: R.provenanceLine, justifyContent: "center" }}>
+          <Text style={{ fontSize: SB_PROVENANCE.size, color: C.muted, lineHeight: 1 }}>{l}</Text>
+        </View>
       ))}
     </View>
   );
@@ -362,11 +388,12 @@ function TestRowView({ row, height, twoColumn }: { row: TestRow; height: number;
 
 /* ----------------------------------------------------------------- signature */
 
-function Signature({ lab, images }: { lab: LabProfile; images: SbPdfImages }) {
+function Signature({ lab, images, ours = true }: { lab: LabProfile; images: SbPdfImages; ours?: boolean }) {
   const S = SB_SIGN;
   return (
     <>
       {images.qc && <Image src={images.qc} style={{ position: "absolute", left: i(S.qc.x), top: i(S.qc.y), width: i(S.qc.s), height: i(S.qc.s) }} />}
+      {ours ? <>
       <Image
         src={images.signature}
         style={{ position: "absolute", left: i(S.centerX - S.sign.w / 2), top: i(S.sign.y), width: i(S.sign.w), height: i(S.sign.h), objectFit: "contain" }}
@@ -374,6 +401,30 @@ function Signature({ lab, images }: { lab: LabProfile; images: SbPdfImages }) {
       <View style={{ position: "absolute", left: i(S.centerX - 1.3), width: i(2.6), top: i(S.nameY) }}>
         <Text style={{ textAlign: "center", fontSize: S.nameSize, fontWeight: 800 }}>{lab.signatory.name}</Text>
         <Text style={{ textAlign: "center", fontSize: S.roleSize, color: C.muted }}>{lab.signatory.designation}</Text>
+      </View>
+      </> : null}
+    </>
+  );
+}
+
+/** A partner lab's medical signatory, with the signature from the same document as the page's results. */
+function PartnerSignatory({ partner, images, centerX }: { partner: PagePartner; images: SbPdfImages; centerX: number }) {
+  const S = SB_SIGN;
+  const P = SB_PARTNER;
+  const [name, qual, reg] = partnerLines(partner);
+  const img = partner.signatory.signatureSrc ? images.partner?.get(partner.signatory.signatureSrc) : undefined;
+  const line = (text: string, size: number, bold: boolean) => (
+    <View style={{ height: i(P.lineH), justifyContent: "center" }}>
+      <Text style={{ textAlign: "center", fontSize: size, fontWeight: bold ? 800 : 400, color: bold ? undefined : C.muted, lineHeight: 1 }}>{text}</Text>
+    </View>
+  );
+  return (
+    <>
+      {img && <Image src={img} style={{ position: "absolute", left: i(centerX - S.sign.w / 2), top: i(S.sign.y), width: i(S.sign.w), height: i(S.sign.h), objectFit: "contain" }} />}
+      <View style={{ position: "absolute", left: i(centerX - P.w / 2), width: i(P.w), top: i(S.nameY) }}>
+        {line(name, P.nameSize, true)}
+        {line(qual, P.lineSize, false)}
+        {line(reg, P.lineSize, false)}
       </View>
     </>
   );

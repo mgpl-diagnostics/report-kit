@@ -3,8 +3,9 @@ import { barcodeSvg } from "../barcode";
 import { MGPL_LAB } from "../lab";
 import { qrSvg, reportQrValue } from "../qr";
 import type { Align, LabProfile, Report, ReportVariant, Rich, Row, Section, TestRow } from "../../shared/types";
-import { SB_CELL_PAD, SB_COLS } from "./layout";
-import { isGrid, sbLayoutPages, sbRowHeight, showsTableHeader, subtitleOf, type SbPart } from "./measure";
+import { pagePartner, partnerLines, type PagePartner } from "../provenance";
+import { SB_CELL_PAD, SB_COLS, SB_PARTNER, SB_ROWS, SB_SIGN } from "./layout";
+import { isGrid, sbLayoutPages, sbProvenanceLines, sbRowHeight, showsTableHeader, subtitleOf, type SbPart } from "./measure";
 import { flagOf, gridColumns, isTwoColumn, LEGAL, LEGEND, patientFields, sectionMeta, STD_COLUMNS, TWO_COL_RESULT_W } from "./model";
 import { sidebarCss } from "./styles";
 
@@ -29,10 +30,14 @@ export function SidebarReport({ report, variant, lab = MGPL_LAB, includeStyles =
   const bar = report.patient.patientId ? barcodeSvg(report.patient.patientId) : null;
   const qr = qrSvg(reportQrValue(report, lab));
   const signature = variant === "header" ? lab.signatory.signatureHeaderSrc : lab.signatory.signatureNonHeaderSrc;
+  const placement = report.partnerSignatory ?? "beside";
   return (
     <div className="sb-doc">
       {includeStyles && <style dangerouslySetInnerHTML={{ __html: sidebarCss(fontBase) }} />}
-      {pages.map((page, n) => (
+      {pages.map((page, n) => {
+        const partner = placement === "none" ? null : pagePartner(page.parts.map((x) => x.section));
+        const ours = !(partner && placement === "instead");
+        return (
         <div key={n} className="sb-page">
           {variant === "header" && <SbLetterhead lab={lab} />}
           <PatientBlock report={report} />
@@ -51,11 +56,14 @@ export function SidebarReport({ report, variant, lab = MGPL_LAB, includeStyles =
             )}
           </div>
           {lab.qcStampSrc && <img className="sb-qc" src={lab.qcStampSrc} alt="Quality Control Approved" />}
-          <img className="sb-signimg" src={signature} alt="Signature" />
-          <div className="sb-signname">
-            <b>{lab.signatory.name}</b>
-            <span>{lab.signatory.designation}</span>
-          </div>
+          {ours && <img className="sb-signimg" src={signature} alt="Signature" />}
+          {ours && (
+            <div className="sb-signname">
+              <b>{lab.signatory.name}</b>
+              <span>{lab.signatory.designation}</span>
+            </div>
+          )}
+          {partner && <PartnerSignatory partner={partner} centerX={placement === "instead" ? SB_SIGN.centerX : SB_PARTNER.besideX} />}
           <div className="sb-legal">
             <span>{LEGAL}</span>
             <span>
@@ -63,8 +71,25 @@ export function SidebarReport({ report, variant, lab = MGPL_LAB, includeStyles =
             </span>
           </div>
         </div>
-      ))}
+        );
+      })}
     </div>
+  );
+}
+
+/** A partner lab's medical signatory, with the signature from the same document as the page's results. */
+function PartnerSignatory({ partner, centerX }: { partner: PagePartner; centerX: number }) {
+  const [name, qual, reg] = partnerLines(partner);
+  const src = partner.signatory.signatureSrc;
+  return (
+    <>
+      {src && <img className="sb-psignimg" src={src} alt="Signature" style={{ left: inch(centerX - SB_SIGN.sign.w / 2) }} />}
+      <div className="sb-psign" style={{ left: inch(centerX - SB_PARTNER.w / 2) }}>
+        <b>{name}</b>
+        <span>{qual}</span>
+        <span>{reg}</span>
+      </div>
+    </>
   );
 }
 
@@ -150,6 +175,21 @@ function SectionPart({ part }: { part: SbPart }) {
       {showsTableHeader(s) && <TableHeader section={s} />}
       {part.rows.map((row, k) => (
         <RowView key={k} row={row} section={s} />
+      ))}
+      {part.end && <Provenance lines={sbProvenanceLines(s)} />}
+    </div>
+  );
+}
+
+/** "Performed at … · Reported by …" under a test performed by a partner lab. */
+function Provenance({ lines }: { lines: string[] }) {
+  if (!lines.length) return null;
+  return (
+    <div className="sb-prov" style={{ paddingTop: pt(SB_ROWS.provenancePad) }}>
+      {lines.map((l, k) => (
+        <div key={k} style={{ height: pt(SB_ROWS.provenanceLine) }}>
+          {l}
+        </div>
       ))}
     </div>
   );

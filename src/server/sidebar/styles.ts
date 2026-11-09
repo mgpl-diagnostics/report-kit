@@ -7,7 +7,9 @@ import {
   SB_FOOTER,
   SB_HEADER,
   SB_LEGAL,
+  SB_PARTNER,
   SB_PATIENT,
+  SB_PROVENANCE,
   SB_RIGHT,
   SB_ROWS as R,
   SB_SIDEBAR,
@@ -82,6 +84,13 @@ ${[400, 500, 600, 700, 800].map(face).join("\n")}
 .sb-signname { position:absolute; left:${i(SB_SIGN.centerX - 1.3)}; width:${i(2.6)}; top:${i(SB_SIGN.nameY)}; text-align:center; }
 .sb-signname b { display:block; font-size:${SB_SIGN.nameSize}pt; font-weight:800; }
 .sb-signname span { display:block; font-size:${SB_SIGN.roleSize}pt; color:${C.muted}; }
+.sb-prov { font-size:${SB_PROVENANCE.size}pt; color:${C.muted}; padding-left:${i(SB_CELL_PAD)}; }
+.sb-prov div { line-height:${R.provenanceLine}pt; white-space:nowrap; }
+.sb-psignimg { top:${i(SB_SIGN.sign.y)}; width:${i(SB_SIGN.sign.w)}; height:${i(SB_SIGN.sign.h)}; }
+.sb-psign { position:absolute; width:${i(SB_PARTNER.w)}; top:${i(SB_SIGN.nameY)}; text-align:center; }
+.sb-psign b, .sb-psign span { display:block; height:${i(SB_PARTNER.lineH)}; line-height:${i(SB_PARTNER.lineH)}; white-space:nowrap; }
+.sb-psign b { font-size:${SB_PARTNER.nameSize}pt; font-weight:800; }
+.sb-psign span { font-size:${SB_PARTNER.lineSize}pt; color:${C.muted}; }
 .sb-legal { position:absolute; left:${i(SB_CONTENT.x)}; width:${i(SB_CONTENT.w)}; top:${i(SB_LEGAL.y)}; display:flex; justify-content:space-between; font-size:${SB_LEGAL.size}pt; color:${C.muted}; border-top:0.5pt solid ${C.line}; padding-top:3pt; }
 
 @media print {

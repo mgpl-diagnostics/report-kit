@@ -39,6 +39,7 @@ export * as SIDEBAR_LAYOUT from "./sidebar/layout";
 export { reportCss } from "./styles";
 export * as LAYOUT from "./layout";
 export { headerCells, layoutPages, rowBox } from "./measure";
+export { pagePartner, partnerLines, provenanceText, wrapText, type PagePartner } from "./provenance";
 
 // Data
 export * from "./templates";

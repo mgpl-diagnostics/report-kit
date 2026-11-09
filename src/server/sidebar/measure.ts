@@ -1,5 +1,6 @@
 import type { Report, Row, Section } from "../../shared/types";
-import { SB_BODY, SB_ROWS as R } from "./layout";
+import { provenanceLines } from "../provenance";
+import { SB_BODY, SB_PROVENANCE, SB_ROWS as R } from "./layout";
 
 /** A slice of a section placed on one page. */
 export interface SbPart {
@@ -7,6 +8,8 @@ export interface SbPart {
   rows: Row[];
   /** true when this slice continues a section from the previous page */
   continued: boolean;
+  /** true when this slice ends the section (its provenance line prints here) */
+  end: boolean;
 }
 export interface SbPage {
   parts: SbPart[];
@@ -45,6 +48,15 @@ export function sbSectionHead(s: Section): number {
   return R.dept + (subtitleOf(s) ? R.title : 0) + (hasMeta(s) ? R.meta : 0) + (showsTableHeader(s) ? R.tableHeader : 0);
 }
 
+/** Provenance line(s) under an imported test, as printed. */
+export const sbProvenanceLines = (s: Section) => provenanceLines(s, SB_PROVENANCE.maxChars);
+
+/** Height of the provenance block under a section (0 when the test is our own), pt. */
+export function sbSectionFoot(s: Section): number {
+  const n = sbProvenanceLines(s).length;
+  return n ? R.provenancePad + n * R.provenanceLine : 0;
+}
+
 export const SB_CAPACITY = (SB_BODY.bottom - SB_BODY.top) * 72;
 
 /** Splits the report into A4 pages for the Navy Sidebar design. */
@@ -60,27 +72,29 @@ export function sbLayoutPages(report: Report): SbPage[] {
     const last = si === report.sections.length - 1;
     if (section.pageBreakBefore && pages[pages.length - 1].length) newPage();
     const head = sbSectionHead(section);
+    const foot = sbSectionFoot(section);
     const rows = displayRows(section);
     const hs = rows.map(sbRowHeight);
     const need = (i: number) => {
       let h = hs[i];
       if (rows[i].kind === "heading" && i + 1 < hs.length) h += hs[i + 1];
-      if (last && i === hs.length - 1) h += R.end;
+      // the provenance line stays with the last row (and the end legend with both)
+      if (i === hs.length - 1) h += foot + (last ? R.end : 0);
       return h;
     };
 
     let part: Row[] = [];
     let continued = false;
-    const flush = () => {
-      pages[pages.length - 1].push({ section, rows: part, continued });
+    const flush = (end: boolean) => {
+      pages[pages.length - 1].push({ section, rows: part, continued, end });
       part = [];
     };
 
-    if (used > 0 && used + head + (hs.length ? need(0) : 0) > SB_CAPACITY) newPage();
+    if (used > 0 && used + head + (hs.length ? need(0) : foot) > SB_CAPACITY) newPage();
     used += head;
     rows.forEach((row, i) => {
       if (part.length && used + need(i) > SB_CAPACITY) {
-        flush();
+        flush(false);
         newPage();
         continued = true;
         used = head;
@@ -88,8 +102,8 @@ export function sbLayoutPages(report: Report): SbPage[] {
       part.push(row);
       used += hs[i];
     });
-    flush();
-    used += R.sectionGap;
+    flush(true);
+    used += foot + R.sectionGap;
   });
 
   return pages.map((parts, i) => ({ parts, isLast: i === pages.length - 1 }));
