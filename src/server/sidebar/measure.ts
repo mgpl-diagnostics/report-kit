@@ -35,6 +35,17 @@ export function wrapCount(text: string, widthIn: number, sizePt: number): number
   return total;
 }
 
+/**
+ * Font size (pt) at which `text` fits one line `widthIn` inches wide: `maxPt`, or smaller for long values
+ * (a sample type like "Cell-Free DNA (cfDNA) Preservative Tube"), never below `minPt`. Header fields have a
+ * fixed height, so a wrapped value would run into the field below.
+ */
+export function fitSize(text: string, widthIn: number, maxPt: number, minPt = 6.5, bold = false): number {
+  const em = text.length * EM * (bold ? 1.08 : 1);
+  if (!em) return maxPt;
+  return Math.max(minPt, Math.min(maxPt, Math.floor(((widthIn * 72) / em) * 10) / 10));
+}
+
 /** A range as printed lines: a list, or text with line breaks; null for a one-line range. */
 export const rangeLines = (row: TestRow): string[] | null =>
   Array.isArray(row.range)

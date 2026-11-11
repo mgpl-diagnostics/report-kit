@@ -679,7 +679,7 @@ Key facts for agents:
 ```json
 {
   "name": "@mgpl-diagnostics/report-kit",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "MGPL Diagnostics lab reports — BACKEND kit (Node.js): templates, React document rendering, pure Node A4 PDF, and an HTTP API for Next.js, Fastify, Express or any backend. Frontends use @mgpl-diagnostics/client.",
   "type": "module",
   "license": "SEE LICENSE IN LICENSE",
@@ -3584,8 +3584,8 @@ import { MGPL_LAB } from "../lab";
 import { qrSvg, reportQrValue } from "../qr";
 import type { Align, LabProfile, Report, ReportVariant, Rich, Row, Section, TestRow } from "../../shared/types";
 import { pagePartner, partnerLines, type PagePartner } from "../provenance";
-import { SB_CELL_PAD, SB_COLS, SB_PARTNER, SB_ROWS, SB_SIGN } from "./layout";
-import { isGrid, rangeLines, sbLayoutPages, sbProvenanceLines, sbRowHeight, showsTableHeader, subtitleOf, type SbPart } from "./measure";
+import { SB_CELL_PAD, SB_COLS, SB_PARTNER, SB_ROWS, SB_SIGN, SB_PATIENT } from "./layout";
+import { fitSize, isGrid, rangeLines, sbLayoutPages, sbProvenanceLines, sbRowHeight, showsTableHeader, subtitleOf, type SbPart } from "./measure";
 import { flagOf, gridColumns, isTwoColumn, LEGAL, LEGEND, patientFields, sectionMeta, STD_COLUMNS, TWO_COL_RESULT_W } from "./model";
 import { sidebarCss } from "./styles";
 
@@ -3727,7 +3727,12 @@ function PatientBlock({ report }: { report: Report }) {
       {patientFields(report).map((f) => (
         <div key={f.label}>
           <span className="sb-f-label">{f.label}</span>
-          <span className={`sb-f-value${f.strong ? " strong" : ""}`}>{f.value}</span>
+          <span
+            className={`sb-f-value${f.strong ? " strong" : ""}`}
+            style={{ fontSize: `${fitSize(String(f.value ?? ""), SB_PATIENT.grid.colW - 0.08, SB_PATIENT.grid.valueSize, 6.5, f.strong)}pt`, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
+          >
+            {f.value}
+          </span>
         </div>
       ))}
     </div>
@@ -3932,7 +3937,7 @@ import {
   SB_SIGN,
 } from "./layout";
 import { pagePartner, partnerLines, type PagePartner } from "../provenance";
-import { isGrid, rangeLines, sbLayoutPages, sbProvenanceLines, sbRowHeight, showsTableHeader, subtitleOf, type SbPart } from "./measure";
+import { fitSize, isGrid, rangeLines, sbLayoutPages, sbProvenanceLines, sbRowHeight, showsTableHeader, subtitleOf, type SbPart } from "./measure";
 import { flagOf, gridColumns, isTwoColumn, LEGAL, LEGEND, patientFields, sectionMeta, STD_COLUMNS, TWO_COL_RESULT_W } from "./model";
 
 /** Images pre-loaded as PNG/JPG buffers (see renderSidebarPdf). */
@@ -4113,7 +4118,7 @@ function PatientBlock({ report }: { report: Report }) {
       {patientFields(report).map((f) => (
         <View key={f.label} style={{ width: i(g.colW), height: i(g.rowH) }}>
           <Text style={{ fontSize: g.labelSize, fontWeight: 700, letterSpacing: 0.4, color: C.muted, lineHeight: 1.3 }}>{f.label.toUpperCase()}</Text>
-          <Text style={{ fontSize: g.valueSize, fontWeight: f.strong ? 800 : 600, lineHeight: 1.35 }}>{f.value}</Text>
+          <Text style={{ fontSize: fitSize(String(f.value ?? ""), g.colW - 0.08, g.valueSize, 6.5, f.strong), fontWeight: f.strong ? 800 : 600, lineHeight: 1.35 }}>{f.value}</Text>
         </View>
       ))}
     </View>
@@ -4513,6 +4518,17 @@ export function wrapCount(text: string, widthIn: number, sizePt: number): number
     total += lines;
   }
   return total;
+}
+
+/**
+ * Font size (pt) at which `text` fits one line `widthIn` inches wide: `maxPt`, or smaller for long values
+ * (a sample type like "Cell-Free DNA (cfDNA) Preservative Tube"), never below `minPt`. Header fields have a
+ * fixed height, so a wrapped value would run into the field below.
+ */
+export function fitSize(text: string, widthIn: number, maxPt: number, minPt = 6.5, bold = false): number {
+  const em = text.length * EM * (bold ? 1.08 : 1);
+  if (!em) return maxPt;
+  return Math.max(minPt, Math.min(maxPt, Math.floor(((widthIn * 72) / em) * 10) / 10));
 }
 
 /** A range as printed lines: a list, or text with line breaks; null for a one-line range. */
