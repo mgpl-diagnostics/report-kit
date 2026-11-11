@@ -22,7 +22,7 @@ import {
   SB_SIGN,
 } from "./layout";
 import { pagePartner, partnerLines, type PagePartner } from "../provenance";
-import { isGrid, rangeLines, sbLayoutPages, sbProvenanceLines, sbRowHeight, showsTableHeader, subtitleOf, type SbPart } from "./measure";
+import { fitSize, isGrid, rangeLines, sbLayoutPages, sbProvenanceLines, sbRowHeight, showsTableHeader, subtitleOf, type SbPart } from "./measure";
 import { flagOf, gridColumns, isTwoColumn, LEGAL, LEGEND, patientFields, sectionMeta, STD_COLUMNS, TWO_COL_RESULT_W } from "./model";
 
 /** Images pre-loaded as PNG/JPG buffers (see renderSidebarPdf). */
@@ -203,7 +203,7 @@ function PatientBlock({ report }: { report: Report }) {
       {patientFields(report).map((f) => (
         <View key={f.label} style={{ width: i(g.colW), height: i(g.rowH) }}>
           <Text style={{ fontSize: g.labelSize, fontWeight: 700, letterSpacing: 0.4, color: C.muted, lineHeight: 1.3 }}>{f.label.toUpperCase()}</Text>
-          <Text style={{ fontSize: g.valueSize, fontWeight: f.strong ? 800 : 600, lineHeight: 1.35 }}>{f.value}</Text>
+          <Text style={{ fontSize: fitSize(String(f.value ?? ""), g.colW - 0.08, g.valueSize, 6.5, f.strong), fontWeight: f.strong ? 800 : 600, lineHeight: 1.35 }}>{f.value}</Text>
         </View>
       ))}
     </View>

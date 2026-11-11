@@ -4,8 +4,8 @@ import { MGPL_LAB } from "../lab";
 import { qrSvg, reportQrValue } from "../qr";
 import type { Align, LabProfile, Report, ReportVariant, Rich, Row, Section, TestRow } from "../../shared/types";
 import { pagePartner, partnerLines, type PagePartner } from "../provenance";
-import { SB_CELL_PAD, SB_COLS, SB_PARTNER, SB_ROWS, SB_SIGN } from "./layout";
-import { isGrid, rangeLines, sbLayoutPages, sbProvenanceLines, sbRowHeight, showsTableHeader, subtitleOf, type SbPart } from "./measure";
+import { SB_CELL_PAD, SB_COLS, SB_PARTNER, SB_ROWS, SB_SIGN, SB_PATIENT } from "./layout";
+import { fitSize, isGrid, rangeLines, sbLayoutPages, sbProvenanceLines, sbRowHeight, showsTableHeader, subtitleOf, type SbPart } from "./measure";
 import { flagOf, gridColumns, isTwoColumn, LEGAL, LEGEND, patientFields, sectionMeta, STD_COLUMNS, TWO_COL_RESULT_W } from "./model";
 import { sidebarCss } from "./styles";
 
@@ -147,7 +147,12 @@ function PatientBlock({ report }: { report: Report }) {
       {patientFields(report).map((f) => (
         <div key={f.label}>
           <span className="sb-f-label">{f.label}</span>
-          <span className={`sb-f-value${f.strong ? " strong" : ""}`}>{f.value}</span>
+          <span
+            className={`sb-f-value${f.strong ? " strong" : ""}`}
+            style={{ fontSize: `${fitSize(String(f.value ?? ""), SB_PATIENT.grid.colW - 0.08, SB_PATIENT.grid.valueSize, 6.5, f.strong)}pt`, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
+          >
+            {f.value}
+          </span>
         </div>
       ))}
     </div>
