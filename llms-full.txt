@@ -278,6 +278,8 @@ Results imported from a partner lab's report (the api reads the partner's PDF wi
 | Logo, icons, QC stamp | replace files in [`assets/report-assets/`](assets/report-assets) (SVG or PNG) |
 | **Real signature** | **never in git.** Set `MGPL_SIGNATURE_FILE` (or `MGPL_SIGNATURE_HEADER_FILE` / `MGPL_SIGNATURE_NONHEADER_FILE`) to a private image path on the server. The repo ships a placeholder. |
 | QR verify link | `verifyBaseUrl` in the lab profile. Without it, the QR holds a plain-text summary. |
+| UPI "scan to pay" on invoices | `MGPL_UPI_ID` (e.g. `lab@okaxis`) and optionally `MGPL_UPI_NAME` (payee name) on the server, read by `labFromEnv` / `defaultLab()`; or `upiId` / `upiName` in the lab profile. A malformed id fails at start-up. |
+| Logo in the centre of the pay QR | `markSrc` (square mark, default `assets/report-assets/mark.svg`). `qrSvg(text, color, { ecc: "H", hole })` leaves the blank centre; `qrHoleBox(hole)` says where the logo goes. |
 | CORS, body limit, demo samples | `createReportApi({ cors, maxBodyBytes, samples })` |
 
 ## Printing
@@ -580,16 +582,16 @@ Helpers: `loadImage`, `svgToPng`, `registerFonts`, `assetsDir()`, `packageRoot()
 
 ```ts
 interface LabProfile {
-  name; logoSrc; addressLines: string[]; email; phone;
+  name; logoSrc; markSrc?; addressLines: string[]; email; phone;
   signatory: { name; designation; signatureHeaderSrc; signatureNonHeaderSrc };
   qcStampSrc?; icons: { emailSrc; phoneSrc };
   sidebarText?; footerLines?: string[]; verifyBaseUrl?;
-  upiId?; gstin?; registrationNo?; invoiceTerms?: string[];   // used by invoice-kit
+  upiId?; upiName?; markSrc?; gstin?; registrationNo?; invoiceTerms?: string[];   // used by invoice-kit
 }
 
 MGPL_LAB                      // the lab's branding, with a placeholder signature
 defaultLab()                  // MGPL_LAB + real signatures from the environment
-labFromEnv(lab?, env?)        // reads MGPL_SIGNATURE_FILE / _HEADER_FILE / _NONHEADER_FILE
+labFromEnv(lab?, env?)        // reads MGPL_SIGNATURE_FILE / _HEADER_FILE / _NONHEADER_FILE, MGPL_UPI_ID / MGPL_UPI_NAME
 withSignatureFiles(lab, { header?, nonHeader? })
 imageFileToDataUri(path)
 ```
@@ -597,7 +599,7 @@ imageFileToDataUri(path)
 ## Other exports
 
 `resolveFlag(row)`, `formatDate`, `formatDateTime`, `formatDoctor`, `fullName`, `barcodeSvg(text, "code39" | "code128")`,
-`qrSvg(text)`, `reportQrValue(report, lab)`, `sbLayoutPages`, `layoutPages`, `SIDEBAR_LAYOUT`, `LAYOUT`,
+`qrSvg(text, color?, { ecc?, hole? })`, `qrHoleBox(hole)`, `UPI_ID_PATTERN`, `reportQrValue(report, lab)`, `sbLayoutPages`, `layoutPages`, `SIDEBAR_LAYOUT`, `LAYOUT`,
 `sidebarCss`, `reportCss`, `SAMPLES`, `getSampleReport(id)`, and all types (`Patient`, `Report`, `Section`, `Row`, …).
 
 ## CLI
@@ -679,7 +681,7 @@ Key facts for agents:
 ```json
 {
   "name": "@mgpl-diagnostics/report-kit",
-  "version": "2.2.1",
+  "version": "2.3.0",
   "description": "MGPL Diagnostics lab reports — BACKEND kit (Node.js): templates, React document rendering, pure Node A4 PDF, and an HTTP API for Next.js, Fastify, Express or any backend. Frontends use @mgpl-diagnostics/client.",
   "type": "module",
   "license": "SEE LICENSE IN LICENSE",
@@ -972,7 +974,7 @@ import { gridColumns, isTwoColumn, LEGAL, LEGEND, patientFields, sectionMeta, TW
 import { displayRows, sbProvenanceLines, subtitleOf } from "../src/server/sidebar/measure";
 import { classicProvenanceLines } from "../src/server/measure";
 import { pagePartner, partnerLines } from "../src/server/provenance";
-import { getSampleReport, SAMPLES } from "../src/server";
+import { getSampleReport, labFromEnv, qrHoleBox, qrSvg, SAMPLES } from "../src/server";
 
 const root = process.cwd();
 const fontDir = join(root, "assets", "report-fonts");
@@ -1134,10 +1136,30 @@ async function main() {
   const t0 = Date.now();
   /* assets */
   const lab = MGPL_LAB;
-  for (const s of [lab.logoSrc, lab.qcStampSrc!, lab.icons.emailSrc, lab.icons.phoneSrc, lab.signatory.signatureHeaderSrc, lab.signatory.signatureNonHeaderSrc])
+  for (const s of [lab.logoSrc, lab.markSrc!, lab.qcStampSrc!, lab.icons.emailSrc, lab.icons.phoneSrc, lab.signatory.signatureHeaderSrc, lab.signatory.signatureNonHeaderSrc])
     if (!existsSync(join(root, "assets", s))) warn(`missing asset public${s}`);
   for (const f of ["carlito-400.woff", "carlito-700.woff", "carlito-400-italic.woff", "carlito-700-italic.woff", "archivo-black-400.woff", "barlow-semi-condensed-300.woff", ...[400, 500, 600, 700, 800].map((w) => `manrope-${w}.woff`)])
     if (!existsSync(join(fontDir, f))) warn(`missing font ${f}`);
+  /* QR with a centre hole for a logo: no module inside the hole, the logo box inside it, ecc H enforced */
+  {
+    const upi = "upi://pay?pa=lab.example%40okaxis&pn=Example+Lab&am=1499.00&cu=INR&tn=Invoice+ARG01%2F26-27%2F1043";
+    const svg = qrSvg(upi, "#000", { ecc: "H", hole: 0.26 });
+    const n = Number(/viewBox="0 0 (\d+)/.exec(svg)?.[1]);
+    const box = qrHoleBox(0.26);
+    const lo = box.offset * n, hi = (box.offset + box.size) * n;
+    for (const m of svg.matchAll(/M(\d+) (\d+)h(\d+)/g)) {
+      const [x, y, w] = [Number(m[1]), Number(m[2]), Number(m[3])];
+      if (y + 1 > lo && y < hi && x + w > lo && x < hi) warn(`qrSvg hole: a module at ${x},${y} sits under the logo`);
+    }
+    let threw = false;
+    try { qrSvg(upi, "#000", { hole: 0.2 }); } catch { threw = true; }
+    if (!threw) warn("qrSvg: a centre hole without ecc H must throw");
+    const env = labFromEnv(MGPL_LAB, { MGPL_UPI_ID: "lab.example@okaxis", MGPL_UPI_NAME: "Example Lab" });
+    if (env.upiId !== "lab.example@okaxis" || env.upiName !== "Example Lab") warn("labFromEnv: MGPL_UPI_ID / MGPL_UPI_NAME not read");
+    threw = false;
+    try { labFromEnv(MGPL_LAB, { MGPL_UPI_ID: "not a vpa" }); } catch { threw = true; }
+    if (!threw) warn("labFromEnv: a malformed MGPL_UPI_ID must throw");
+  }
 
   /* letterhead text + glyphs + fit */
   const lhText = [lab.sidebarText ?? "", ...lab.addressLines, lab.phone, lab.email, ...(lab.footerLines ?? []), LEGEND, LEGAL, lab.signatory.name, lab.signatory.designation].join(" ");
@@ -1823,6 +1845,7 @@ export function labWithAssetUrls(lab: LabProfile, assetBase: string): LabProfile
   return {
     ...lab,
     logoSrc: u(lab.logoSrc),
+    markSrc: lab.markSrc && u(lab.markSrc),
     qcStampSrc: lab.qcStampSrc && u(lab.qcStampSrc),
     icons: { emailSrc: u(lab.icons.emailSrc), phoneSrc: u(lab.icons.phoneSrc) },
     signatory: { ...lab.signatory, signatureHeaderSrc: u(lab.signatory.signatureHeaderSrc), signatureNonHeaderSrc: u(lab.signatory.signatureNonHeaderSrc) },
@@ -2149,6 +2172,7 @@ export function inlineLab(lab: LabProfile = defaultLab(), dir = assetsDir()): La
   return {
     ...lab,
     logoSrc: conv(lab.logoSrc),
+    markSrc: lab.markSrc && conv(lab.markSrc),
     qcStampSrc: lab.qcStampSrc && conv(lab.qcStampSrc),
     icons: { emailSrc: conv(lab.icons.emailSrc), phoneSrc: conv(lab.icons.phoneSrc) },
     signatory: {
@@ -2237,7 +2261,7 @@ export { ReportPdf, SbLetterheadPdf, SidebarLetterheadPdf, SidebarReportPdf, typ
 export { loadImage, registerFonts, svgToPng } from "./pdf";
 export { renderReportHtml, renderLetterheadHtml, inlineLab, type RenderHtmlOptions } from "./html";
 export { assetsDir, packageRoot } from "./paths";
-export { defaultLab, labFromEnv, withSignatureFiles, imageFileToDataUri } from "./signatures";
+export { defaultLab, labFromEnv, withSignatureFiles, imageFileToDataUri, UPI_ID_PATTERN } from "./signatures";
 
 // Documents (React components rendered on the server)
 export { LabReport, type LabReportProps } from "./LabReport";
@@ -2256,7 +2280,7 @@ export * from "./templates";
 export { MGPL_LAB } from "./lab";
 export { getSampleReport, SAMPLES, type Sample } from "./samples";
 export { formatDate, formatDateTime, formatDoctor, fullName, resolveFlag } from "./format";
-export { qrSvg, reportQrValue } from "./qr";
+export { qrSvg, qrHoleBox, reportQrValue, QR_MAX_HOLE, type QrOptions } from "./qr";
 export { barcodeSvg } from "./barcode";
 
 // Shared types + API contract
@@ -2280,6 +2304,7 @@ import type { LabProfile } from "../shared/types";
 export const MGPL_LAB: LabProfile = {
   name: "Maa Gayatri Path Lab",
   logoSrc: "/report-assets/logo.svg",
+  markSrc: "/report-assets/mark.svg",
   addressLines: ["In front Of Police Station", "Arang, Raipur, Chhattisgarh"],
   email: "maagaytripatholgylab2006@gmail.com",
   phone: "+91-9340638661",
@@ -2302,7 +2327,7 @@ export const MGPL_LAB: LabProfile = {
     "In front Of Police Station, Arang, Raipur, Chhattisgarh   |   +91-9340638661   |   maagaytripatholgylab2006@gmail.com",
   ],
   // verifyBaseUrl: "https://your-domain/verify/",  // set when an online verify page exists
-  // upiId: "yourname@bank",                          // set to print a "scan to pay" UPI QR on invoices
+  // upiId: "yourname@bank",                          // or MGPL_UPI_ID / MGPL_UPI_NAME on the server (labFromEnv)
   invoiceTerms: [
     "Reports are released only after full payment.",
     "Please bring this invoice when collecting reports.",
@@ -3321,25 +3346,54 @@ import QRCode from "qrcode";
 import { fullName, formatDate } from "./format";
 import type { LabProfile, Report } from "../shared/types";
 
+export interface QrOptions {
+  /** Error correction: "M" (default) recovers ~15% damage, "H" ~30% (use it when a logo covers the centre). */
+  ecc?: "L" | "M" | "Q" | "H";
+  /**
+   * Leave a blank square in the centre for a logo, as a fraction of the code's width (0 to 0.3).
+   * Rounded to whole modules, odd so it stays centred. Needs `ecc: "H"`; the logo is drawn on top by
+   * the caller, inside `qrHoleBox(hole)` of the code's box.
+   */
+  hole?: number;
+}
+
+/** Largest centre hole: about 9% of the area, well inside what level H corrects. */
+export const QR_MAX_HOLE = 0.3;
+
 /** QR code as an SVG string (encoded by the `qrcode` library; synchronous, works in browser and Node). */
-export function qrSvg(text: string, color = "#000"): string {
-  const qr = QRCode.create(text, { errorCorrectionLevel: "M" });
+export function qrSvg(text: string, color = "#000", opts: QrOptions = {}): string {
+  const hole = Math.min(QR_MAX_HOLE, Math.max(0, opts.hole ?? 0));
+  if (hole > 0 && opts.ecc !== "H") throw new Error("qrSvg: a centre hole needs ecc \"H\"");
+  const qr = QRCode.create(text, { errorCorrectionLevel: opts.ecc ?? "M" });
   const n = qr.modules.size;
+  let k = Math.round(n * hole);
+  if (k > 0 && k % 2 !== n % 2) k += 1;
+  const h0 = (n - k) / 2;
+  const inHole = (x: number, y: number) => k > 0 && x >= h0 && x < h0 + k && y >= h0 && y < h0 + k;
   // one rectangle per horizontal run of dark modules keeps the SVG small
   let d = "";
   for (let y = 0; y < n; y++) {
     for (let x = 0; x < n; ) {
-      if (!qr.modules.get(y, x)) {
+      if (!qr.modules.get(y, x) || inHole(x, y)) {
         x++;
         continue;
       }
       let run = 1;
-      while (x + run < n && qr.modules.get(y, x + run)) run++;
+      while (x + run < n && qr.modules.get(y, x + run) && !inHole(x + run, y)) run++;
       d += `M${x} ${y}h${run}v1h-${run}z`;
       x += run;
     }
   }
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${n} ${n}" shape-rendering="crispEdges"><path fill="${color}" d="${d}"/></svg>`;
+}
+
+/**
+ * Where the logo goes on a QR drawn with `hole`: offset and size as fractions of the code's width, a
+ * little inside the blank square so the logo never touches a module. Both renderers use this.
+ */
+export function qrHoleBox(hole: number): { offset: number; size: number } {
+  const size = Math.min(QR_MAX_HOLE, Math.max(0, hole)) * 0.8;
+  return { offset: (1 - size) / 2, size };
 }
 
 /** What the report's QR code encodes: a verify URL when the lab has one, else a text summary. */
@@ -4861,6 +4915,11 @@ ${[400, 500, 600, 700, 800].map(face).join("\n")}
 //   MGPL_SIGNATURE_FILE=/secure/signature.jpg            (both variants)
 //   MGPL_SIGNATURE_HEADER_FILE=/secure/sig-scan.jpg      (header variant, overrides the above)
 //   MGPL_SIGNATURE_NONHEADER_FILE=/secure/sig-green.png  (non-header variant, overrides the above)
+//
+// Payments (not secret, but the lab's own, so they live in the server's environment too):
+//
+//   MGPL_UPI_ID=lab@okaxis        UPI ID (VPA) for the "scan to pay" QR on invoices
+//   MGPL_UPI_NAME="Lab Name"      payee name the UPI app shows (default: the lab name)
 import { readFileSync } from "node:fs";
 import { extname, resolve } from "node:path";
 import { MGPL_LAB } from "./lab";
@@ -4894,12 +4953,27 @@ export function withSignatureFiles(lab: LabProfile, files: { header?: string; no
   };
 }
 
-/** `lab` with signatures taken from the MGPL_SIGNATURE_* environment variables, if set. */
+/** A UPI ID (VPA): handle@provider, e.g. "mgpl.lab@okaxis". */
+export const UPI_ID_PATTERN = /^[A-Za-z0-9._-]{2,256}@[A-Za-z][A-Za-z0-9.-]{1,63}$/;
+
+/**
+ * `lab` with signatures from the MGPL_SIGNATURE_* environment variables and the UPI ID from
+ * MGPL_UPI_ID / MGPL_UPI_NAME, when set. A malformed UPI ID throws, so a typo fails at start-up
+ * instead of printing a QR that no app can pay.
+ */
 export function labFromEnv(lab: LabProfile = MGPL_LAB, env: Record<string, string | undefined> = process.env): LabProfile {
   const both = env.MGPL_SIGNATURE_FILE;
   const header = env.MGPL_SIGNATURE_HEADER_FILE ?? both;
   const nonHeader = env.MGPL_SIGNATURE_NONHEADER_FILE ?? both;
-  return header || nonHeader ? withSignatureFiles(lab, { header, nonHeader }) : lab;
+  let out = header || nonHeader ? withSignatureFiles(lab, { header, nonHeader }) : lab;
+  const upiId = env.MGPL_UPI_ID?.trim();
+  const upiName = env.MGPL_UPI_NAME?.trim();
+  if (upiId) {
+    if (!UPI_ID_PATTERN.test(upiId)) throw new Error(`MGPL_UPI_ID is not a UPI ID (handle@provider): ${upiId}`);
+    out = { ...out, upiId };
+  }
+  if (upiName) out = { ...out, upiName: upiName.slice(0, 99) };
+  return out;
 }
 
 /** The lab used when none is passed: MGPL_LAB + private signatures from the environment. */
@@ -6553,6 +6627,9 @@ export interface Section {
 export interface LabProfile {
   name: string;
   logoSrc: string;
+  /** Square logo mark (no wordmark), printed in the centre of the "scan to pay" QR on invoices.
+   *  Optional: without it the pay QR has no logo. */
+  markSrc?: string;
   addressLines: string[];
   email: string;
   phone: string;
@@ -6576,6 +6653,8 @@ export interface LabProfile {
   /* ---- billing (invoice kit) ---- */
   /** UPI ID (VPA) for the "scan to pay" QR on invoices, e.g. "mgpl@okaxis" */
   upiId?: string;
+  /** Payee name the UPI app shows (the bank account's name). Defaults to `name`. */
+  upiName?: string;
   /** Printed on invoices when the lab is GST registered */
   gstin?: string;
   /** Clinical establishment / lab registration number */

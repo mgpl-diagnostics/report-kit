@@ -81,6 +81,7 @@ export function labWithAssetUrls(lab: LabProfile, assetBase: string): LabProfile
   return {
     ...lab,
     logoSrc: u(lab.logoSrc),
+    markSrc: lab.markSrc && u(lab.markSrc),
     qcStampSrc: lab.qcStampSrc && u(lab.qcStampSrc),
     icons: { emailSrc: u(lab.icons.emailSrc), phoneSrc: u(lab.icons.phoneSrc) },
     signatory: { ...lab.signatory, signatureHeaderSrc: u(lab.signatory.signatureHeaderSrc), signatureNonHeaderSrc: u(lab.signatory.signatureNonHeaderSrc) },

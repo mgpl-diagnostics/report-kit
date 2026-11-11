@@ -27,7 +27,7 @@ export { ReportPdf, SbLetterheadPdf, SidebarLetterheadPdf, SidebarReportPdf, typ
 export { loadImage, registerFonts, svgToPng } from "./pdf";
 export { renderReportHtml, renderLetterheadHtml, inlineLab, type RenderHtmlOptions } from "./html";
 export { assetsDir, packageRoot } from "./paths";
-export { defaultLab, labFromEnv, withSignatureFiles, imageFileToDataUri } from "./signatures";
+export { defaultLab, labFromEnv, withSignatureFiles, imageFileToDataUri, UPI_ID_PATTERN } from "./signatures";
 
 // Documents (React components rendered on the server)
 export { LabReport, type LabReportProps } from "./LabReport";
@@ -46,7 +46,7 @@ export * from "./templates";
 export { MGPL_LAB } from "./lab";
 export { getSampleReport, SAMPLES, type Sample } from "./samples";
 export { formatDate, formatDateTime, formatDoctor, fullName, resolveFlag } from "./format";
-export { qrSvg, reportQrValue } from "./qr";
+export { qrSvg, qrHoleBox, reportQrValue, QR_MAX_HOLE, type QrOptions } from "./qr";
 export { barcodeSvg } from "./barcode";
 
 // Shared types + API contract

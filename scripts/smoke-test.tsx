@@ -31,7 +31,7 @@ import { gridColumns, isTwoColumn, LEGAL, LEGEND, patientFields, sectionMeta, TW
 import { displayRows, sbProvenanceLines, subtitleOf } from "../src/server/sidebar/measure";
 import { classicProvenanceLines } from "../src/server/measure";
 import { pagePartner, partnerLines } from "../src/server/provenance";
-import { getSampleReport, SAMPLES } from "../src/server";
+import { getSampleReport, labFromEnv, qrHoleBox, qrSvg, SAMPLES } from "../src/server";
 
 const root = process.cwd();
 const fontDir = join(root, "assets", "report-fonts");
@@ -193,10 +193,30 @@ async function main() {
   const t0 = Date.now();
   /* assets */
   const lab = MGPL_LAB;
-  for (const s of [lab.logoSrc, lab.qcStampSrc!, lab.icons.emailSrc, lab.icons.phoneSrc, lab.signatory.signatureHeaderSrc, lab.signatory.signatureNonHeaderSrc])
+  for (const s of [lab.logoSrc, lab.markSrc!, lab.qcStampSrc!, lab.icons.emailSrc, lab.icons.phoneSrc, lab.signatory.signatureHeaderSrc, lab.signatory.signatureNonHeaderSrc])
     if (!existsSync(join(root, "assets", s))) warn(`missing asset public${s}`);
   for (const f of ["carlito-400.woff", "carlito-700.woff", "carlito-400-italic.woff", "carlito-700-italic.woff", "archivo-black-400.woff", "barlow-semi-condensed-300.woff", ...[400, 500, 600, 700, 800].map((w) => `manrope-${w}.woff`)])
     if (!existsSync(join(fontDir, f))) warn(`missing font ${f}`);
+  /* QR with a centre hole for a logo: no module inside the hole, the logo box inside it, ecc H enforced */
+  {
+    const upi = "upi://pay?pa=lab.example%40okaxis&pn=Example+Lab&am=1499.00&cu=INR&tn=Invoice+ARG01%2F26-27%2F1043";
+    const svg = qrSvg(upi, "#000", { ecc: "H", hole: 0.26 });
+    const n = Number(/viewBox="0 0 (\d+)/.exec(svg)?.[1]);
+    const box = qrHoleBox(0.26);
+    const lo = box.offset * n, hi = (box.offset + box.size) * n;
+    for (const m of svg.matchAll(/M(\d+) (\d+)h(\d+)/g)) {
+      const [x, y, w] = [Number(m[1]), Number(m[2]), Number(m[3])];
+      if (y + 1 > lo && y < hi && x + w > lo && x < hi) warn(`qrSvg hole: a module at ${x},${y} sits under the logo`);
+    }
+    let threw = false;
+    try { qrSvg(upi, "#000", { hole: 0.2 }); } catch { threw = true; }
+    if (!threw) warn("qrSvg: a centre hole without ecc H must throw");
+    const env = labFromEnv(MGPL_LAB, { MGPL_UPI_ID: "lab.example@okaxis", MGPL_UPI_NAME: "Example Lab" });
+    if (env.upiId !== "lab.example@okaxis" || env.upiName !== "Example Lab") warn("labFromEnv: MGPL_UPI_ID / MGPL_UPI_NAME not read");
+    threw = false;
+    try { labFromEnv(MGPL_LAB, { MGPL_UPI_ID: "not a vpa" }); } catch { threw = true; }
+    if (!threw) warn("labFromEnv: a malformed MGPL_UPI_ID must throw");
+  }
 
   /* letterhead text + glyphs + fit */
   const lhText = [lab.sidebarText ?? "", ...lab.addressLines, lab.phone, lab.email, ...(lab.footerLines ?? []), LEGEND, LEGAL, lab.signatory.name, lab.signatory.designation].join(" ");

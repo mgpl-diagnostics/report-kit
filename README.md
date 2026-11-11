@@ -220,6 +220,8 @@ Results imported from a partner lab's report (the api reads the partner's PDF wi
 | Logo, icons, QC stamp | replace files in [`assets/report-assets/`](assets/report-assets) (SVG or PNG) |
 | **Real signature** | **never in git.** Set `MGPL_SIGNATURE_FILE` (or `MGPL_SIGNATURE_HEADER_FILE` / `MGPL_SIGNATURE_NONHEADER_FILE`) to a private image path on the server. The repo ships a placeholder. |
 | QR verify link | `verifyBaseUrl` in the lab profile. Without it, the QR holds a plain-text summary. |
+| UPI "scan to pay" on invoices | `MGPL_UPI_ID` (e.g. `lab@okaxis`) and optionally `MGPL_UPI_NAME` (payee name) on the server, read by `labFromEnv` / `defaultLab()`; or `upiId` / `upiName` in the lab profile. A malformed id fails at start-up. |
+| Logo in the centre of the pay QR | `markSrc` (square mark, default `assets/report-assets/mark.svg`). `qrSvg(text, color, { ecc: "H", hole })` leaves the blank centre; `qrHoleBox(hole)` says where the logo goes. |
 | CORS, body limit, demo samples | `createReportApi({ cors, maxBodyBytes, samples })` |
 
 ## Printing

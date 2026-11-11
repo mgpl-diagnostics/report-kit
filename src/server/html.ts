@@ -25,6 +25,7 @@ export function inlineLab(lab: LabProfile = defaultLab(), dir = assetsDir()): La
   return {
     ...lab,
     logoSrc: conv(lab.logoSrc),
+    markSrc: lab.markSrc && conv(lab.markSrc),
     qcStampSrc: lab.qcStampSrc && conv(lab.qcStampSrc),
     icons: { emailSrc: conv(lab.icons.emailSrc), phoneSrc: conv(lab.icons.phoneSrc) },
     signatory: {
