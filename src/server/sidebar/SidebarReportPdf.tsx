@@ -22,7 +22,7 @@ import {
   SB_SIGN,
 } from "./layout";
 import { pagePartner, partnerLines, type PagePartner } from "../provenance";
-import { isGrid, sbLayoutPages, sbProvenanceLines, sbRowHeight, showsTableHeader, subtitleOf, type SbPart } from "./measure";
+import { isGrid, rangeLines, sbLayoutPages, sbProvenanceLines, sbRowHeight, showsTableHeader, subtitleOf, type SbPart } from "./measure";
 import { flagOf, gridColumns, isTwoColumn, LEGAL, LEGEND, patientFields, sectionMeta, STD_COLUMNS, TWO_COL_RESULT_W } from "./model";
 
 /** Images pre-loaded as PNG/JPG buffers (see renderSidebarPdf). */
@@ -369,9 +369,9 @@ function TestRowView({ row, height, twoColumn }: { row: TestRow; height: number;
       <Cell w={SB_COLS.unit} align="center">
         <Text>{row.unit ?? ""}</Text>
       </Cell>
-      {Array.isArray(row.range) ? (
+      {rangeLines(row) ? (
         <Cell w={SB_COLS.range}>
-          {row.range.map((l, k) => (
+          {rangeLines(row)!.map((l, k) => (
             <Text key={k} style={{ fontSize: 7, lineHeight: 9 / 7 }}>
               {l}
             </Text>

@@ -5,7 +5,7 @@ import { qrSvg, reportQrValue } from "../qr";
 import type { Align, LabProfile, Report, ReportVariant, Rich, Row, Section, TestRow } from "../../shared/types";
 import { pagePartner, partnerLines, type PagePartner } from "../provenance";
 import { SB_CELL_PAD, SB_COLS, SB_PARTNER, SB_ROWS, SB_SIGN } from "./layout";
-import { isGrid, sbLayoutPages, sbProvenanceLines, sbRowHeight, showsTableHeader, subtitleOf, type SbPart } from "./measure";
+import { isGrid, rangeLines, sbLayoutPages, sbProvenanceLines, sbRowHeight, showsTableHeader, subtitleOf, type SbPart } from "./measure";
 import { flagOf, gridColumns, isTwoColumn, LEGAL, LEGEND, patientFields, sectionMeta, STD_COLUMNS, TWO_COL_RESULT_W } from "./model";
 import { sidebarCss } from "./styles";
 
@@ -292,10 +292,10 @@ function TestRowView({ row, height, twoColumn }: { row: TestRow; height: string;
       {cell("result", "center", <span className={f.abnormal ? "sb-res-ab" : undefined}>{row.result ?? ""}</span>)}
       {cell("flag", "center", f.label ? <span className="sb-pill" style={{ background: f.color }}>{f.label}</span> : null)}
       {cell("unit", "center", <span>{row.unit ?? ""}</span>)}
-      {Array.isArray(row.range) ? (
+      {rangeLines(row) ? (
         <div className="sb-cell l" style={{ width: inch(SB_COLS.range), paddingLeft: inch(SB_CELL_PAD) }}>
           <div className="sb-range-lines">
-            {row.range.map((l, k) => (
+            {rangeLines(row)!.map((l, k) => (
               <span key={k}>{l}</span>
             ))}
           </div>
