@@ -8,6 +8,7 @@ import type { LabProfile } from "../shared/types";
 export const MGPL_LAB: LabProfile = {
   name: "Maa Gayatri Path Lab",
   logoSrc: "/report-assets/logo.svg",
+  markSrc: "/report-assets/mark.svg",
   addressLines: ["In front Of Police Station", "Arang, Raipur, Chhattisgarh"],
   email: "maagaytripatholgylab2006@gmail.com",
   phone: "+91-9340638661",
@@ -30,7 +31,7 @@ export const MGPL_LAB: LabProfile = {
     "In front Of Police Station, Arang, Raipur, Chhattisgarh   |   +91-9340638661   |   maagaytripatholgylab2006@gmail.com",
   ],
   // verifyBaseUrl: "https://your-domain/verify/",  // set when an online verify page exists
-  // upiId: "yourname@bank",                          // set to print a "scan to pay" UPI QR on invoices
+  // upiId: "yourname@bank",                          // or MGPL_UPI_ID / MGPL_UPI_NAME on the server (labFromEnv)
   invoiceTerms: [
     "Reports are released only after full payment.",
     "Please bring this invoice when collecting reports.",

@@ -221,6 +221,9 @@ export interface Section {
 export interface LabProfile {
   name: string;
   logoSrc: string;
+  /** Square logo mark (no wordmark), printed in the centre of the "scan to pay" QR on invoices.
+   *  Optional: without it the pay QR has no logo. */
+  markSrc?: string;
   addressLines: string[];
   email: string;
   phone: string;
@@ -244,6 +247,8 @@ export interface LabProfile {
   /* ---- billing (invoice kit) ---- */
   /** UPI ID (VPA) for the "scan to pay" QR on invoices, e.g. "mgpl@okaxis" */
   upiId?: string;
+  /** Payee name the UPI app shows (the bank account's name). Defaults to `name`. */
+  upiName?: string;
   /** Printed on invoices when the lab is GST registered */
   gstin?: string;
   /** Clinical establishment / lab registration number */

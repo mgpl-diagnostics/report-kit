@@ -120,16 +120,16 @@ Helpers: `loadImage`, `svgToPng`, `registerFonts`, `assetsDir()`, `packageRoot()
 
 ```ts
 interface LabProfile {
-  name; logoSrc; addressLines: string[]; email; phone;
+  name; logoSrc; markSrc?; addressLines: string[]; email; phone;
   signatory: { name; designation; signatureHeaderSrc; signatureNonHeaderSrc };
   qcStampSrc?; icons: { emailSrc; phoneSrc };
   sidebarText?; footerLines?: string[]; verifyBaseUrl?;
-  upiId?; gstin?; registrationNo?; invoiceTerms?: string[];   // used by invoice-kit
+  upiId?; upiName?; markSrc?; gstin?; registrationNo?; invoiceTerms?: string[];   // used by invoice-kit
 }
 
 MGPL_LAB                      // the lab's branding, with a placeholder signature
 defaultLab()                  // MGPL_LAB + real signatures from the environment
-labFromEnv(lab?, env?)        // reads MGPL_SIGNATURE_FILE / _HEADER_FILE / _NONHEADER_FILE
+labFromEnv(lab?, env?)        // reads MGPL_SIGNATURE_FILE / _HEADER_FILE / _NONHEADER_FILE, MGPL_UPI_ID / MGPL_UPI_NAME
 withSignatureFiles(lab, { header?, nonHeader? })
 imageFileToDataUri(path)
 ```
@@ -137,7 +137,7 @@ imageFileToDataUri(path)
 ## Other exports
 
 `resolveFlag(row)`, `formatDate`, `formatDateTime`, `formatDoctor`, `fullName`, `barcodeSvg(text, "code39" | "code128")`,
-`qrSvg(text)`, `reportQrValue(report, lab)`, `sbLayoutPages`, `layoutPages`, `SIDEBAR_LAYOUT`, `LAYOUT`,
+`qrSvg(text, color?, { ecc?, hole? })`, `qrHoleBox(hole)`, `UPI_ID_PATTERN`, `reportQrValue(report, lab)`, `sbLayoutPages`, `layoutPages`, `SIDEBAR_LAYOUT`, `LAYOUT`,
 `sidebarCss`, `reportCss`, `SAMPLES`, `getSampleReport(id)`, and all types (`Patient`, `Report`, `Section`, `Row`, …).
 
 ## CLI
