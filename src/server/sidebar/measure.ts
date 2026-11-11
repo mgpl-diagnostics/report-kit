@@ -1,6 +1,62 @@
-import type { Report, Row, Section } from "../../shared/types";
+import type { Report, Rich, Row, Section, TestRow } from "../../shared/types";
 import { provenanceLines } from "../provenance";
-import { SB_BODY, SB_PROVENANCE, SB_ROWS as R } from "./layout";
+import { SB_BODY, SB_CELL_PAD, SB_COLS, SB_CONTENT, SB_PROVENANCE, SB_ROWS as R } from "./layout";
+
+/* ---------------------------------------------------------- content-aware heights
+ * Both renderers wrap text inside fixed-height rows, so a row must reserve the height its wrapped
+ * content needs, or the text spills into the next row. Line counts are estimated from Manrope's
+ * average advance width (conservative: a little extra space beats an overlap). */
+const EM = 0.56;
+const LINE_GAP = 1.3;
+
+/** Lines `text` wraps to in a box `widthIn` inches wide at `sizePt` (explicit "\n" breaks kept). */
+export function wrapCount(text: string, widthIn: number, sizePt: number): number {
+  const per = Math.max(6, Math.floor((widthIn * 72) / (sizePt * EM)));
+  let total = 0;
+  for (const para of text.split("\n")) {
+    const words = para.split(/\s+/).filter(Boolean);
+    if (!words.length) {
+      total += 1;
+      continue;
+    }
+    let lines = 1, len = 0;
+    for (const w of words) {
+      if (len === 0) {
+        lines += Math.floor((w.length - 1) / per);
+        len = ((w.length - 1) % per) + 1;
+      } else if (len + 1 + w.length <= per) len += 1 + w.length;
+      else {
+        lines += 1 + Math.floor((w.length - 1) / per);
+        len = ((w.length - 1) % per) + 1;
+      }
+    }
+    total += lines;
+  }
+  return total;
+}
+
+/** A range as printed lines: a list, or text with line breaks; null for a one-line range. */
+export const rangeLines = (row: TestRow): string[] | null =>
+  Array.isArray(row.range)
+    ? row.range
+    : typeof row.range === "string" && row.range.includes("\n")
+      ? row.range.split("\n").map((l) => l.trim()).filter(Boolean)
+      : null;
+
+const plain = (r: Rich): string => (typeof r === "string" ? r : (Array.isArray(r) ? r : [r]).map((x) => x.text).join(""));
+const richSize = (r: Rich): number => (typeof r === "string" ? 0 : Math.max(0, ...(Array.isArray(r) ? r : [r]).map((x) => x.size ?? 0)));
+const inner = (w: number) => w - 2 * SB_CELL_PAD;
+
+function testRowHeight(row: TestRow): number {
+  const f = R.fontSize;
+  const nameH = wrapCount(`${row.name}${row.abbr ? ` ${row.abbr}` : ""}`, inner(SB_COLS.name), f) * f * LINE_GAP + 4;
+  const resultH = wrapCount(String(row.result ?? ""), inner(SB_COLS.result), f) * f * LINE_GAP + 4;
+  const lines = rangeLines(row);
+  const rangeH = lines
+    ? lines.reduce((n, l) => n + wrapCount(l, inner(SB_COLS.range), 7), 0) * R.rangeLine + 6
+    : wrapCount(String(row.range ?? ""), inner(SB_COLS.range), f) * f * LINE_GAP + 4;
+  return Math.max(R.test, nameH, resultH, rangeH);
+}
 
 /** A slice of a section placed on one page. */
 export interface SbPart {
@@ -33,11 +89,13 @@ export function sbRowHeight(row: Row): number {
       return R.heading;
     case "cells":
       return R.cells;
-    case "text":
-      return R.text + (row.spaceBefore ? 8 : 0);
+    case "text": {
+      const size = richSize(row.content) || R.fontSize;
+      const lines = wrapCount(plain(row.content), SB_CONTENT.w - 2 * SB_CELL_PAD - (row.indent ?? 0), size);
+      return Math.max(R.text, lines * size * LINE_GAP + 6) + (row.spaceBefore ? 8 : 0);
+    }
     case "test": {
-      let h = R.test;
-      if (Array.isArray(row.range)) h = Math.max(h, row.range.length * R.rangeLine + 6);
+      let h = testRowHeight(row);
       if (row.method) h += R.method;
       return h;
     }

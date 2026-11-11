@@ -679,7 +679,7 @@ Key facts for agents:
 ```json
 {
   "name": "@mgpl-diagnostics/report-kit",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "MGPL Diagnostics lab reports — BACKEND kit (Node.js): templates, React document rendering, pure Node A4 PDF, and an HTTP API for Next.js, Fastify, Express or any backend. Frontends use @mgpl-diagnostics/client.",
   "type": "module",
   "license": "SEE LICENSE IN LICENSE",
@@ -3585,7 +3585,7 @@ import { qrSvg, reportQrValue } from "../qr";
 import type { Align, LabProfile, Report, ReportVariant, Rich, Row, Section, TestRow } from "../../shared/types";
 import { pagePartner, partnerLines, type PagePartner } from "../provenance";
 import { SB_CELL_PAD, SB_COLS, SB_PARTNER, SB_ROWS, SB_SIGN } from "./layout";
-import { isGrid, sbLayoutPages, sbProvenanceLines, sbRowHeight, showsTableHeader, subtitleOf, type SbPart } from "./measure";
+import { isGrid, rangeLines, sbLayoutPages, sbProvenanceLines, sbRowHeight, showsTableHeader, subtitleOf, type SbPart } from "./measure";
 import { flagOf, gridColumns, isTwoColumn, LEGAL, LEGEND, patientFields, sectionMeta, STD_COLUMNS, TWO_COL_RESULT_W } from "./model";
 import { sidebarCss } from "./styles";
 
@@ -3872,10 +3872,10 @@ function TestRowView({ row, height, twoColumn }: { row: TestRow; height: string;
       {cell("result", "center", <span className={f.abnormal ? "sb-res-ab" : undefined}>{row.result ?? ""}</span>)}
       {cell("flag", "center", f.label ? <span className="sb-pill" style={{ background: f.color }}>{f.label}</span> : null)}
       {cell("unit", "center", <span>{row.unit ?? ""}</span>)}
-      {Array.isArray(row.range) ? (
+      {rangeLines(row) ? (
         <div className="sb-cell l" style={{ width: inch(SB_COLS.range), paddingLeft: inch(SB_CELL_PAD) }}>
           <div className="sb-range-lines">
-            {row.range.map((l, k) => (
+            {rangeLines(row)!.map((l, k) => (
               <span key={k}>{l}</span>
             ))}
           </div>
@@ -3932,7 +3932,7 @@ import {
   SB_SIGN,
 } from "./layout";
 import { pagePartner, partnerLines, type PagePartner } from "../provenance";
-import { isGrid, sbLayoutPages, sbProvenanceLines, sbRowHeight, showsTableHeader, subtitleOf, type SbPart } from "./measure";
+import { isGrid, rangeLines, sbLayoutPages, sbProvenanceLines, sbRowHeight, showsTableHeader, subtitleOf, type SbPart } from "./measure";
 import { flagOf, gridColumns, isTwoColumn, LEGAL, LEGEND, patientFields, sectionMeta, STD_COLUMNS, TWO_COL_RESULT_W } from "./model";
 
 /** Images pre-loaded as PNG/JPG buffers (see renderSidebarPdf). */
@@ -4279,9 +4279,9 @@ function TestRowView({ row, height, twoColumn }: { row: TestRow; height: number;
       <Cell w={SB_COLS.unit} align="center">
         <Text>{row.unit ?? ""}</Text>
       </Cell>
-      {Array.isArray(row.range) ? (
+      {rangeLines(row) ? (
         <Cell w={SB_COLS.range}>
-          {row.range.map((l, k) => (
+          {rangeLines(row)!.map((l, k) => (
             <Text key={k} style={{ fontSize: 7, lineHeight: 9 / 7 }}>
               {l}
             </Text>
@@ -4478,9 +4478,65 @@ export const SB_ROWS = {
 ## File: src/server/sidebar/measure.ts
 
 ```ts
-import type { Report, Row, Section } from "../../shared/types";
+import type { Report, Rich, Row, Section, TestRow } from "../../shared/types";
 import { provenanceLines } from "../provenance";
-import { SB_BODY, SB_PROVENANCE, SB_ROWS as R } from "./layout";
+import { SB_BODY, SB_CELL_PAD, SB_COLS, SB_CONTENT, SB_PROVENANCE, SB_ROWS as R } from "./layout";
+
+/* ---------------------------------------------------------- content-aware heights
+ * Both renderers wrap text inside fixed-height rows, so a row must reserve the height its wrapped
+ * content needs, or the text spills into the next row. Line counts are estimated from Manrope's
+ * average advance width (conservative: a little extra space beats an overlap). */
+const EM = 0.56;
+const LINE_GAP = 1.3;
+
+/** Lines `text` wraps to in a box `widthIn` inches wide at `sizePt` (explicit "\n" breaks kept). */
+export function wrapCount(text: string, widthIn: number, sizePt: number): number {
+  const per = Math.max(6, Math.floor((widthIn * 72) / (sizePt * EM)));
+  let total = 0;
+  for (const para of text.split("\n")) {
+    const words = para.split(/\s+/).filter(Boolean);
+    if (!words.length) {
+      total += 1;
+      continue;
+    }
+    let lines = 1, len = 0;
+    for (const w of words) {
+      if (len === 0) {
+        lines += Math.floor((w.length - 1) / per);
+        len = ((w.length - 1) % per) + 1;
+      } else if (len + 1 + w.length <= per) len += 1 + w.length;
+      else {
+        lines += 1 + Math.floor((w.length - 1) / per);
+        len = ((w.length - 1) % per) + 1;
+      }
+    }
+    total += lines;
+  }
+  return total;
+}
+
+/** A range as printed lines: a list, or text with line breaks; null for a one-line range. */
+export const rangeLines = (row: TestRow): string[] | null =>
+  Array.isArray(row.range)
+    ? row.range
+    : typeof row.range === "string" && row.range.includes("\n")
+      ? row.range.split("\n").map((l) => l.trim()).filter(Boolean)
+      : null;
+
+const plain = (r: Rich): string => (typeof r === "string" ? r : (Array.isArray(r) ? r : [r]).map((x) => x.text).join(""));
+const richSize = (r: Rich): number => (typeof r === "string" ? 0 : Math.max(0, ...(Array.isArray(r) ? r : [r]).map((x) => x.size ?? 0)));
+const inner = (w: number) => w - 2 * SB_CELL_PAD;
+
+function testRowHeight(row: TestRow): number {
+  const f = R.fontSize;
+  const nameH = wrapCount(`${row.name}${row.abbr ? ` ${row.abbr}` : ""}`, inner(SB_COLS.name), f) * f * LINE_GAP + 4;
+  const resultH = wrapCount(String(row.result ?? ""), inner(SB_COLS.result), f) * f * LINE_GAP + 4;
+  const lines = rangeLines(row);
+  const rangeH = lines
+    ? lines.reduce((n, l) => n + wrapCount(l, inner(SB_COLS.range), 7), 0) * R.rangeLine + 6
+    : wrapCount(String(row.range ?? ""), inner(SB_COLS.range), f) * f * LINE_GAP + 4;
+  return Math.max(R.test, nameH, resultH, rangeH);
+}
 
 /** A slice of a section placed on one page. */
 export interface SbPart {
@@ -4513,11 +4569,13 @@ export function sbRowHeight(row: Row): number {
       return R.heading;
     case "cells":
       return R.cells;
-    case "text":
-      return R.text + (row.spaceBefore ? 8 : 0);
+    case "text": {
+      const size = richSize(row.content) || R.fontSize;
+      const lines = wrapCount(plain(row.content), SB_CONTENT.w - 2 * SB_CELL_PAD - (row.indent ?? 0), size);
+      return Math.max(R.text, lines * size * LINE_GAP + 6) + (row.spaceBefore ? 8 : 0);
+    }
     case "test": {
-      let h = R.test;
-      if (Array.isArray(row.range)) h = Math.max(h, row.range.length * R.rangeLine + 6);
+      let h = testRowHeight(row);
       if (row.method) h += R.method;
       return h;
     }
