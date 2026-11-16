@@ -1,5 +1,5 @@
 import { readFile } from "node:fs/promises";
-import { extname, join } from "node:path";
+import { extname, join, relative, resolve, sep } from "node:path";
 import { Resvg } from "@resvg/resvg-js";
 import { Font } from "@react-pdf/renderer";
 import { FONTS } from "../layout";
@@ -48,7 +48,11 @@ async function load(src: string, publicDir: string): Promise<PdfImage> {
     data = Buffer.from(await res.arrayBuffer());
     kind = res.headers.get("content-type") ?? extname(new URL(src).pathname);
   } else {
-    const path = join(publicDir, decodeURI(src.split("?")[0]));
+    const root = resolve(publicDir);
+    const path = resolve(root, "." + sep + decodeURI(src.split("?")[0]));
+    // a local src never leaves publicDir ("/../../etc/x.png" would otherwise read any file on the server)
+    const rel = relative(root, path);
+    if (!rel || rel.startsWith("..") || resolve(root, rel) !== path) throw new Error(`Image ${src}: outside the assets folder`);
     data = await readFile(path);
     kind = extname(path);
   }

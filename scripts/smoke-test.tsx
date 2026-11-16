@@ -32,6 +32,8 @@ import { displayRows, sbProvenanceLines, subtitleOf } from "../src/server/sideba
 import { classicProvenanceLines } from "../src/server/measure";
 import { pagePartner, partnerLines } from "../src/server/provenance";
 import { getSampleReport, labFromEnv, qrHoleBox, qrSvg, SAMPLES } from "../src/server";
+import { HttpError, reportFromRequest } from "../src/server/api";
+import { loadImage } from "../src/server/pdf/assets";
 
 const root = process.cwd();
 const fontDir = join(root, "assets", "report-fonts");
@@ -298,6 +300,30 @@ async function main() {
     const cl = await pdfText(await renderReportPdf({ report, variant: "header", design: "classic" }));
     if (!cl.includes(squash(classicProvenanceLines(lipid!)[0]!))) warn("partner-lab classic PDF: provenance line missing");
     console.log("ok   partner-lab provenance, NABL only where marked, partner signatory (beside / instead / none, mixed pages)");
+  }
+
+  // image sources from a client never reach the file system or the network (file disclosure, SSRF)
+  {
+    const base = getSampleReport(SAMPLES[0]!.id)!;
+    const withSrc = (signatureSrc: string) => ({
+      ...base,
+      sections: base.sections.map((s) => ({ ...s, provenance: { performedBy: "Fictional Lab", sourceId: "s1", reportedBy: [{ name: "Dr. Test", signatureSrc }] } })),
+    });
+    for (const bad of ["/../../../../etc/hostname.png", "/report-assets/../../package.json", "http://127.0.0.1:9/x.png", "https://example.com/x.png", "file:///etc/passwd", "data:image/svg+xml;base64,PHN2Zy8+"]) {
+      try {
+        reportFromRequest({ report: withSrc(bad) });
+        warn(`api: signatureSrc "${bad}" must be refused`);
+      } catch (e) {
+        if (!(e instanceof HttpError) || e.status !== 400) warn(`api: signatureSrc "${bad}" must be a 400, got ${(e as Error).message}`);
+      }
+      if (!bad.startsWith("http") && !bad.startsWith("data:") && !bad.startsWith("file:")) {
+        const read = await loadImage(bad, join(root, "assets")).then(() => true, () => false);
+        if (read) warn(`loadImage: "${bad}" read a file outside the assets folder`);
+      }
+    }
+    reportFromRequest({ report: withSrc("/report-assets/signature-placeholder.svg") });
+    reportFromRequest({ report: withSrc("data:image/png;base64,iVBORw0KGgo=") });
+    console.log("ok   api refuses image sources outside data: URIs and /report-assets/ (no file read, no fetch)");
   }
 
   const total = SAMPLES.length * designs.length * variants.length;
