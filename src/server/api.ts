@@ -128,11 +128,30 @@ export function templateCatalog(): TemplateCatalog {
   };
 }
 
+/**
+ * Image sources a client may put in a report: a PNG/JPEG data URI (what the server builds for partner
+ * signatures) or one of the package's own "/report-assets/…" files. Anything else (an http(s) URL, a path
+ * with "..", a file elsewhere on the server) would make the PDF renderer fetch or read it and embed it in
+ * the answer (SSRF and file disclosure), so it is refused.
+ */
+const SAFE_IMAGE_SRC = /^(data:image\/(png|jpeg);base64,[A-Za-z0-9+/]+={0,2}|\/report-assets\/[\w-]+(\.[\w-]+)*)$/;
+
+export function assertSafeImages(report: Report): void {
+  for (const [i, s] of (report.sections ?? []).entries()) {
+    for (const [j, r] of (s?.provenance?.reportedBy ?? []).entries()) {
+      const src = r?.signatureSrc;
+      if (src !== undefined && (typeof src !== "string" || !SAFE_IMAGE_SRC.test(src)))
+        throw new Error(`sections[${i}].provenance.reportedBy[${j}].signatureSrc must be a PNG/JPEG data: URI or a /report-assets/ file`);
+    }
+  }
+}
+
 /** Turns a ReportRequest into a Report (throws HttpError 400 on bad input). */
 export function reportFromRequest(body: ReportRequest, opts: Pick<ApiOptions, "samples"> = {}): Report {
   try {
     if (body.report) {
       if (!body.report.patient?.name || !Array.isArray(body.report.sections)) throw new Error("report needs patient.name and sections[]");
+      assertSafeImages(body.report);
       return body.report;
     }
     if (body.sample) {

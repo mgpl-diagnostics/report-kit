@@ -681,7 +681,7 @@ Key facts for agents:
 ```json
 {
   "name": "@mgpl-diagnostics/report-kit",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "description": "MGPL Diagnostics lab reports — BACKEND kit (Node.js): templates, React document rendering, pure Node A4 PDF, and an HTTP API for Next.js, Fastify, Express or any backend. Frontends use @mgpl-diagnostics/client.",
   "type": "module",
   "license": "SEE LICENSE IN LICENSE",
@@ -975,6 +975,8 @@ import { displayRows, sbProvenanceLines, subtitleOf } from "../src/server/sideba
 import { classicProvenanceLines } from "../src/server/measure";
 import { pagePartner, partnerLines } from "../src/server/provenance";
 import { getSampleReport, labFromEnv, qrHoleBox, qrSvg, SAMPLES } from "../src/server";
+import { HttpError, reportFromRequest } from "../src/server/api";
+import { loadImage } from "../src/server/pdf/assets";
 
 const root = process.cwd();
 const fontDir = join(root, "assets", "report-fonts");
@@ -1241,6 +1243,30 @@ async function main() {
     const cl = await pdfText(await renderReportPdf({ report, variant: "header", design: "classic" }));
     if (!cl.includes(squash(classicProvenanceLines(lipid!)[0]!))) warn("partner-lab classic PDF: provenance line missing");
     console.log("ok   partner-lab provenance, NABL only where marked, partner signatory (beside / instead / none, mixed pages)");
+  }
+
+  // image sources from a client never reach the file system or the network (file disclosure, SSRF)
+  {
+    const base = getSampleReport(SAMPLES[0]!.id)!;
+    const withSrc = (signatureSrc: string) => ({
+      ...base,
+      sections: base.sections.map((s) => ({ ...s, provenance: { performedBy: "Fictional Lab", sourceId: "s1", reportedBy: [{ name: "Dr. Test", signatureSrc }] } })),
+    });
+    for (const bad of ["/../../../../etc/hostname.png", "/report-assets/../../package.json", "http://127.0.0.1:9/x.png", "https://example.com/x.png", "file:///etc/passwd", "data:image/svg+xml;base64,PHN2Zy8+"]) {
+      try {
+        reportFromRequest({ report: withSrc(bad) });
+        warn(`api: signatureSrc "${bad}" must be refused`);
+      } catch (e) {
+        if (!(e instanceof HttpError) || e.status !== 400) warn(`api: signatureSrc "${bad}" must be a 400, got ${(e as Error).message}`);
+      }
+      if (!bad.startsWith("http") && !bad.startsWith("data:") && !bad.startsWith("file:")) {
+        const read = await loadImage(bad, join(root, "assets")).then(() => true, () => false);
+        if (read) warn(`loadImage: "${bad}" read a file outside the assets folder`);
+      }
+    }
+    reportFromRequest({ report: withSrc("/report-assets/signature-placeholder.svg") });
+    reportFromRequest({ report: withSrc("data:image/png;base64,iVBORw0KGgo=") });
+    console.log("ok   api refuses image sources outside data: URIs and /report-assets/ (no file read, no fetch)");
   }
 
   const total = SAMPLES.length * designs.length * variants.length;
@@ -1892,11 +1918,30 @@ export function templateCatalog(): TemplateCatalog {
   };
 }
 
+/**
+ * Image sources a client may put in a report: a PNG/JPEG data URI (what the server builds for partner
+ * signatures) or one of the package's own "/report-assets/…" files. Anything else (an http(s) URL, a path
+ * with "..", a file elsewhere on the server) would make the PDF renderer fetch or read it and embed it in
+ * the answer (SSRF and file disclosure), so it is refused.
+ */
+const SAFE_IMAGE_SRC = /^(data:image\/(png|jpeg);base64,[A-Za-z0-9+/]+={0,2}|\/report-assets\/[\w-]+(\.[\w-]+)*)$/;
+
+export function assertSafeImages(report: Report): void {
+  for (const [i, s] of (report.sections ?? []).entries()) {
+    for (const [j, r] of (s?.provenance?.reportedBy ?? []).entries()) {
+      const src = r?.signatureSrc;
+      if (src !== undefined && (typeof src !== "string" || !SAFE_IMAGE_SRC.test(src)))
+        throw new Error(`sections[${i}].provenance.reportedBy[${j}].signatureSrc must be a PNG/JPEG data: URI or a /report-assets/ file`);
+    }
+  }
+}
+
 /** Turns a ReportRequest into a Report (throws HttpError 400 on bad input). */
 export function reportFromRequest(body: ReportRequest, opts: Pick<ApiOptions, "samples"> = {}): Report {
   try {
     if (body.report) {
       if (!body.report.patient?.name || !Array.isArray(body.report.sections)) throw new Error("report needs patient.name and sections[]");
+      assertSafeImages(body.report);
       return body.report;
     }
     if (body.sample) {
@@ -3077,7 +3122,7 @@ function RichText({ value }: { value: Rich }) {
 
 ```ts
 import { readFile } from "node:fs/promises";
-import { extname, join } from "node:path";
+import { extname, join, relative, resolve, sep } from "node:path";
 import { Resvg } from "@resvg/resvg-js";
 import { Font } from "@react-pdf/renderer";
 import { FONTS } from "../layout";
@@ -3126,7 +3171,11 @@ async function load(src: string, publicDir: string): Promise<PdfImage> {
     data = Buffer.from(await res.arrayBuffer());
     kind = res.headers.get("content-type") ?? extname(new URL(src).pathname);
   } else {
-    const path = join(publicDir, decodeURI(src.split("?")[0]));
+    const root = resolve(publicDir);
+    const path = resolve(root, "." + sep + decodeURI(src.split("?")[0]));
+    // a local src never leaves publicDir ("/../../etc/x.png" would otherwise read any file on the server)
+    const rel = relative(root, path);
+    if (!rel || rel.startsWith("..") || resolve(root, rel) !== path) throw new Error(`Image ${src}: outside the assets folder`);
     data = await readFile(path);
     kind = extname(path);
   }
